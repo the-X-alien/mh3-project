@@ -1,5 +1,10 @@
 import { execSync } from 'child_process'
 import { EventEmitter } from 'events'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export type ActivityEvent = {
   timestamp: number

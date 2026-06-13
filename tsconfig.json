@@ -16,7 +16,7 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "paths": { "@/*": ["./src/*"], "@convex/*": ["./convex/*"] },
+    "paths": { "@/*": ["./src/*"] },
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]

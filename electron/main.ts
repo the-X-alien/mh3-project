@@ -1,11 +1,34 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog } from 'electron'
+import pkg from 'electron-updater'
+const { autoUpdater } = pkg
+import { ActivityMonitor, StressAnalysis } from './monitor.js'
+import { TabReader, TabSnapshot } from './tabReader.js'
+import { fileURLToPath } from 'url'
 import path from 'path'
-import { autoUpdater } from 'electron-updater'
-import { ActivityMonitor, StressAnalysis } from './monitor'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 let monitor: ActivityMonitor | null = null
+let tabReader: TabReader | null = null
+const sessionTabs: TabSnapshot[] = []
+
+// ── Rapid switch detection ──
+const switchTimestamps: number[] = []
+let lastRapidSwitchNotif = 0
+
+// ── Screen-time tracking ──
+let lastActivityTime = 0
+let sessionStartTime = 0
+let lastBreakNotif = 0
+const BREAK_INTERVAL_MS = 20 * 60 * 1000
+const BREAK_RESET_MS = 5 * 60 * 1000
+const RAPID_WINDOW_MS = 20 * 1000
+const RAPID_THRESHOLD = 5
+const RAPID_COOLDOWN = 30 * 1000
+const BREAK_COOLDOWN = 10 * 60 * 1000
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev')
 
@@ -158,6 +181,49 @@ function startMonitor() {
   monitor.start()
 }
 
+function startTabReader() {
+  tabReader = new TabReader()
+
+  tabReader.start(
+    (snapshot) => {
+      const now = Date.now()
+      switchTimestamps.push(now)
+      const cutoff = now - RAPID_WINDOW_MS
+      while (switchTimestamps.length > 0 && switchTimestamps[0]! < cutoff) {
+        switchTimestamps.shift()
+      }
+      if (switchTimestamps.length >= RAPID_THRESHOLD && now - lastRapidSwitchNotif > RAPID_COOLDOWN) {
+        lastRapidSwitchNotif = now
+        new Notification({
+          title: 'Shanti',
+          body: "You're switching tabs rapidly — try to focus on one task.",
+        }).show()
+      }
+
+      sessionTabs.unshift(snapshot)
+      mainWindow?.webContents.send('tabs:update', sessionTabs)
+    },
+    (ok) => {
+      mainWindow?.webContents.send('tabs:permission', ok)
+    },
+    () => {
+      const now = Date.now()
+      lastActivityTime = now
+      if (sessionStartTime === 0) {
+        sessionStartTime = now
+      } else if (now - lastActivityTime > BREAK_RESET_MS) {
+        sessionStartTime = now
+      }
+    },
+  )
+}
+
+ipcMain.handle('tabs:get', () => sessionTabs)
+ipcMain.on('tabs:clear', () => {
+  sessionTabs.length = 0
+  mainWindow?.webContents.send('tabs:update', sessionTabs)
+})
+
 ipcMain.handle('window:minimize', () => mainWindow?.minimize())
 ipcMain.handle('window:maximize', () => {
   if (mainWindow?.isMaximized()) mainWindow.unmaximize()
@@ -182,7 +248,27 @@ app.whenReady().then(() => {
   createTray()
   createWindow()
   startMonitor()
+  startTabReader()
   if (!isDev) setupAutoUpdater()
+
+  // ── Periodic break reminders (every 10s) ──
+  setInterval(() => {
+    if (sessionStartTime === 0) return
+    const now = Date.now()
+    if (now - lastActivityTime > BREAK_RESET_MS) {
+      sessionStartTime = 0
+      return
+    }
+    const elapsed = now - sessionStartTime
+    if (elapsed >= BREAK_INTERVAL_MS && now - lastBreakNotif > BREAK_COOLDOWN) {
+      lastBreakNotif = now
+      sessionStartTime = now
+      new Notification({
+        title: 'Time for a break!',
+        body: "You've been using the screen for 20 minutes straight. Step away for a moment!",
+      }).show()
+    }
+  }, 10000)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -195,4 +281,5 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   monitor?.stop()
+  tabReader?.stop()
 })

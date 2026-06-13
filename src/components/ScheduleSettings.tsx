@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, Loader2, Check } from 'lucide-react'
 import { useWellness, EmailFrequency } from '@/context/WellnessContext'
-import { useQuery, useMutation } from 'convex/react'
-import { api } from '@convex/_generated/api'
+import { supabase, type EmailSchedule } from '@/lib/supabase'
+import { useAuth } from './AuthProvider'
 
 const frequencies: { value: EmailFrequency; label: string; desc: string }[] = [
   { value: 'off', label: 'Off', desc: 'No emails' },
@@ -16,22 +16,56 @@ const frequencies: { value: EmailFrequency; label: string; desc: string }[] = [
 
 export default function ScheduleSettings() {
   const { state, dispatch } = useWellness()
-  const schedule = useQuery(api.email.getSchedule)
-  const saveSchedule = useMutation(api.email.saveSchedule)
+  const { user } = useAuth()
+  const [schedule, setSchedule] = useState<EmailSchedule | null>(null)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    if (schedule) {
-      dispatch({ type: 'SET_EMAIL', value: schedule.email })
-      dispatch({ type: 'SET_FREQUENCY', value: schedule.frequency })
+    if (!user) return
+    setLoading(true)
+    if (user.email) {
+      dispatch({ type: 'SET_EMAIL', value: user.email })
     }
-  }, [schedule, dispatch])
+    supabase
+      .from('email_schedules')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data, error }) => {
+        if (data) {
+          setSchedule(data)
+          dispatch({ type: 'SET_EMAIL', value: data.email })
+          dispatch({ type: 'SET_FREQUENCY', value: data.frequency as EmailFrequency })
+        }
+        setLoading(false)
+      })
+  }, [user, dispatch])
 
   const handleSave = async () => {
+    if (!user) return
     setSaving(true)
     try {
-      await saveSchedule({ email: state.email, frequency: state.emailFrequency })
+      const payload = {
+        user_id: user.id,
+        email: state.email,
+        frequency: state.emailFrequency,
+      }
+
+      if (schedule) {
+        const { error } = await supabase
+          .from('email_schedules')
+          .update(payload)
+          .eq('id', schedule.id)
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('email_schedules')
+          .insert(payload)
+        if (error) throw error
+      }
+
       dispatch({ type: 'SET_FREQUENCY', value: state.emailFrequency })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -40,6 +74,14 @@ export default function ScheduleSettings() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 size={16} className="animate-spin text-fog" />
+      </div>
+    )
   }
 
   return (
@@ -77,10 +119,9 @@ export default function ScheduleSettings() {
         <label className="block font-body text-xs text-fog mb-1.5">Email address</label>
         <input
           type="email"
-          placeholder="you@example.com"
-          value={state.email}
-          onChange={(e) => dispatch({ type: 'SET_EMAIL', value: e.target.value })}
-          className="w-full px-4 py-2.5 rounded-xl bg-glass border border-white/5 text-pure font-body text-sm placeholder:text-fog/30 outline-none focus:border-amber/40 transition-colors"
+          value={user?.email ?? state.email}
+          readOnly
+          className="w-full px-4 py-2.5 rounded-xl bg-glass border border-white/5 text-pure/50 font-body text-sm outline-none cursor-not-allowed"
         />
       </div>
 

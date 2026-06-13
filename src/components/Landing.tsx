@@ -1,21 +1,53 @@
 import { motion } from 'framer-motion'
 import { Wind, Brain, Activity, Download, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 function InstallCommand() {
+  const [os, setOs] = useState<'windows' | 'mac' | 'linux'>('mac')
+
+  useEffect(() => {
+    const ua = navigator.userAgent
+    if (/win/i.test(ua)) setOs('windows')
+    else if (/mac/i.test(ua)) setOs('mac')
+    else setOs('linux')
+  }, [])
+
+  const commands = {
+    windows: 'powershell -c "irm https://mh3-project.vercel.app/install.ps1 | iex"',
+    mac: 'curl -fsSL https://mh3-project.vercel.app/install.sh | sh',
+    linux: 'curl -fsSL https://mh3-project.vercel.app/install.sh | sh',
+  }
+
   return (
-    <div className="relative group">
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative flex items-center justify-between px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-        <code className="font-mono text-xs text-fog/80 select-all">
-          curl -fsSL https://mh3-project.vercel.app/install.sh | sh
-        </code>
-        <button
-          onClick={() => navigator.clipboard.writeText('curl -fsSL https://mh3-project.vercel.app/install.sh | sh')}
-          className="font-body text-[11px] text-amber hover:text-pure transition-colors shrink-0 ml-4"
-        >
-          Copy
-        </button>
+    <div>
+      <div className="flex justify-center gap-2 mb-4">
+        {(['windows', 'mac'] as const).map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => setOs(p)}
+            className={`px-4 py-1.5 rounded-lg font-body text-xs transition-all ${
+              os === p ? 'bg-amber/10 border border-amber/30 text-amber' : 'text-fog/50 hover:text-fog border border-transparent'
+            }`}
+          >
+            {p === 'windows' ? 'Windows' : 'macOS'}
+          </button>
+        ))}
+      </div>
+      <div className="relative group">
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="relative flex items-center justify-between px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <code className="font-mono text-xs text-fog/80 select-all">
+            {commands[os]}
+          </code>
+          <button
+            onClick={() => navigator.clipboard.writeText(commands[os])}
+            className="font-body text-[11px] text-amber hover:text-pure transition-colors shrink-0 ml-4"
+          >
+            Copy
+          </button>
+        </div>
       </div>
     </div>
   )

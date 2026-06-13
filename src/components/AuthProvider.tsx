@@ -1,11 +1,47 @@
-import { type ReactNode } from "react"
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
-import { convexClientInstance, authClient } from "@/lib/convex"
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { supabase } from '@/lib/supabase'
+import { User } from '@supabase/supabase-js'
+
+type AuthContextType = {
+  user: User | null
+  loading: boolean
+  signOut: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  signOut: async () => {},
+})
+
+export function useAuth() {
+  return useContext(AuthContext)
+}
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+  }
+
   return (
-    <ConvexBetterAuthProvider client={convexClientInstance} authClient={authClient}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
-    </ConvexBetterAuthProvider>
+    </AuthContext.Provider>
   )
 }

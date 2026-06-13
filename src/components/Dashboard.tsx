@@ -3,6 +3,7 @@ import { Wind, Brain, Sparkles, Activity, Download, RefreshCw, Loader2 } from 'l
 import { useWellness } from '@/context/WellnessContext'
 import ScheduleSettings from './ScheduleSettings'
 import AiInsights from './AiInsights'
+import TabViewer from './TabViewer'
 import { useState, useEffect } from 'react'
 
 function UpdateManager() {
@@ -137,6 +138,8 @@ export default function Dashboard() {
       </div>
 
       <AiInsights />
+
+      <TabViewer />
 
       <UpdateManager />
 
