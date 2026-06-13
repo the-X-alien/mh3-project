@@ -1,9 +1,42 @@
 import { useEffect, useState } from 'react'
 import { Cpu, Activity, Monitor } from 'lucide-react'
-import type { StressAnalysis, ActivityData } from '@/types/electron'
+import { useWellness } from '@/context/WellnessContext'
+
+interface StressAnalysis {
+  score: number
+  label: 'calm' | 'tense' | 'stressed'
+  reason: string
+  windowActivity: string
+}
+
+interface ActivityData {
+  title: string
+  process: string
+  idle: number
+  switchCount: number
+  totalEvents: number
+}
+
+interface UpdateStatus {
+  status: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error'
+  data?: { version?: string; releaseDate?: string; percent?: number; bytesPerSecond?: number; total?: number; transferred?: number; message?: string }
+}
 
 function isElectron(): boolean {
   return typeof window !== 'undefined' && 'electronAPI' in window
+}
+
+function getElectronAPI() {
+  if (isElectron()) return (window as any).electronAPI as {
+    getCurrentStress: () => Promise<StressAnalysis | null>
+    onStressUpdate: (cb: (a: StressAnalysis) => void) => () => void
+    onActivityUpdate: (cb: (d: ActivityData) => void) => () => void
+    onUpdateStatus: (cb: (s: UpdateStatus) => void) => () => void
+    checkForUpdates: () => Promise<void>
+    downloadUpdate: () => Promise<void>
+    installUpdate: () => Promise<void>
+  }
+  return null
 }
 
 export default function AiInsights() {
@@ -13,14 +46,15 @@ export default function AiInsights() {
   const [aiSyncing, setAiSyncing] = useState(false)
 
   useEffect(() => {
-    if (!isElectron()) {
+    const api = getElectronAPI()
+    if (!api) {
       setAiSyncing(false)
       return
     }
     setAiSyncing(true)
-    window.electronAPI.getCurrentStress().then(setStress)
-    const unsubStress = window.electronAPI.onStressUpdate(setStress)
-    const unsubActivity = window.electronAPI.onActivityUpdate(setActivity)
+    api.getCurrentStress().then(setStress)
+    const unsubStress = api.onStressUpdate(setStress)
+    const unsubActivity = api.onActivityUpdate(setActivity)
     return () => { unsubStress(); unsubActivity() }
   }, [])
 

@@ -9,7 +9,7 @@ export const pushTelemetry = mutation({
     details: v.optional(v.any()),
   },
   handler: async (ctx, { cli, event, details }) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) throw new Error("Not authenticated")
 
     await ctx.db.insert("telemetry_events", {
@@ -32,7 +32,7 @@ export const pushCliSnapshot = mutation({
     isOverloaded: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) throw new Error("Not authenticated")
 
     await ctx.db.insert("cli_snapshots", {
@@ -49,7 +49,7 @@ export const setTrustedContact = mutation({
     optIn: v.boolean(),
   },
   handler: async (ctx, { email, optIn }) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) throw new Error("Not authenticated")
 
     const existing = await ctx.db
@@ -76,7 +76,7 @@ export const recordNudge = mutation({
     delivered: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) throw new Error("Not authenticated")
 
     await ctx.db.insert("nudges", {

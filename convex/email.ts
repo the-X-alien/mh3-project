@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { mutation, query, action, internalAction, internalMutation } from "./_generated/server"
+import { mutation, query, internalAction, internalMutation } from "./_generated/server"
 import { internal } from "./_generated/api"
 import { authComponent } from "./auth"
 import type { Doc } from "./_generated/dataModel"
@@ -31,7 +31,7 @@ export const saveSchedule = mutation({
     ),
   },
   handler: async (ctx, { email, frequency }) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) throw new Error("Not authenticated")
 
     const existing = await ctx.db
@@ -59,7 +59,7 @@ export const saveSchedule = mutation({
 export const getSchedule = query({
   args: {},
   handler: async (ctx) => {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx) as any
     if (!user) return null
     return await ctx.db
       .query("email_schedules")
@@ -68,7 +68,7 @@ export const getSchedule = query({
   },
 })
 
-export const sendWellnessEmail = action({
+export const sendWellnessEmail = internalAction({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const apiKey = process.env.RESEND_API_KEY
@@ -139,7 +139,7 @@ export const checkAndSendDue = internalMutation({
         const nextSend = getNextSend(schedule.frequency)
         await ctx.db.patch(schedule._id, {
           lastSent: now,
-          nextSend: schedule.frequency === "off" ? undefined : nextSend,
+          nextSend,
         })
       } catch (e) {
         console.error(`Failed to send wellness email to ${email}:`, e)

@@ -8,7 +8,7 @@ import authSchema from "./schema"
 import authConfig from "../auth.config"
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
-  components.betterAuth,
+  components.betterAuth as any,
   {
     local: { schema: authSchema },
     verbose: false,

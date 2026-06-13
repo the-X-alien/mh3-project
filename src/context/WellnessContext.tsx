@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback, useRef } from 'react'
 
-export type EmailFrequency = 'off' | 'minutely' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+export type EmailFrequency = 'off' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 type State = {
   stress: number
@@ -92,6 +92,7 @@ type WellnessContextType = {
   startBreathing: () => void
   stopBreathing: () => void
   addCheckIn: () => void
+  resetSession: () => void
 }
 
 const WellnessContext = createContext<WellnessContextType | null>(null)
@@ -105,10 +106,11 @@ export function WellnessProvider({ children }: { children: React.ReactNode }) {
   const startBreathing = useCallback(() => dispatch({ type: 'START_BREATHING' }), [])
   const stopBreathing = useCallback(() => dispatch({ type: 'STOP_BREATHING' }), [])
   const addCheckIn = useCallback(() => dispatch({ type: 'ADD_CHECK_IN' }), [])
+  const resetSession = useCallback(() => dispatch({ type: 'RESET_SESSION' }), [])
 
   return (
     <WellnessContext.Provider
-      value={{ state, dispatch, addTabSwitch, addIdle, addTypingSpike, startBreathing, stopBreathing, addCheckIn }}
+      value={{ state, dispatch, addTabSwitch, addIdle, addTypingSpike, startBreathing, stopBreathing, addCheckIn, resetSession }}
     >
       {children}
     </WellnessContext.Provider>

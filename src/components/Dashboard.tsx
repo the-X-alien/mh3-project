@@ -6,26 +6,32 @@ import AiInsights from './AiInsights'
 import { useState, useEffect } from 'react'
 
 function UpdateManager() {
-  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null)
+  const [updateStatus, setUpdateStatus] = useState<{ status: string; data?: any } | null>(null)
   const [checking, setChecking] = useState(false)
-  const isElectron = typeof window !== 'undefined' && 'electronAPI' in window
+
+  const electron = typeof window !== 'undefined' ? (window as any).electronAPI as {
+    onUpdateStatus: (cb: (s: any) => void) => () => void
+    checkForUpdates: () => Promise<void>
+    downloadUpdate: () => Promise<void>
+    installUpdate: () => Promise<void>
+  } | undefined : undefined
 
   useEffect(() => {
-    if (!isElectron) return
-    const unsub = window.electronAPI.onUpdateStatus(setUpdateStatus)
+    if (!electron) return
+    const unsub = electron.onUpdateStatus(setUpdateStatus)
     return unsub
-  }, [isElectron])
+  }, [])
 
-  if (!isElectron) return null
+  if (!electron) return null
 
   const handleCheck = async () => {
     setChecking(true)
-    await window.electronAPI.checkForUpdates()
+    await electron.checkForUpdates()
     setChecking(false)
   }
 
-  const handleDownload = () => window.electronAPI.downloadUpdate()
-  const handleInstall = () => window.electronAPI.installUpdate()
+  const handleDownload = () => electron.downloadUpdate()
+  const handleInstall = () => electron.installUpdate()
 
   const statusText = updateStatus?.status === 'available' ? `v${updateStatus.data?.version} available`
     : updateStatus?.status === 'downloading' ? `Downloading ${Math.round(updateStatus.data?.percent || 0)}%`
