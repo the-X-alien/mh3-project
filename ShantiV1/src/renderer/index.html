@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Tab Dashboard</title>
+  <link rel="stylesheet" href="../../src/renderer/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div id="permission-banner" class="permission-banner hidden">
+      <div class="banner-text">
+        <strong>Accessibility permission required</strong><br>
+        Tab Dashboard needs Accessibility access to read browser window titles.
+      </div>
+      <button id="open-prefs-btn" class="open-prefs-btn">Open Settings →</button>
+    </div>
+
+    <header class="header">
+      <h1 class="title">Tab Dashboard</h1>
+      <button id="clear-btn" class="clear-btn">Clear Session</button>
+    </header>
+    <p class="subtitle">Switch to Chrome/Firefox/Safari/Edge — tabs appear here within 2 seconds</p>
+
+    <div id="tab-list" class="tab-list">
+      <p class="empty-state">No tabs captured yet. Switch to a browser tab to start tracking.</p>
+    </div>
+  </div>
+  <script src="../../dist/renderer/dashboard.js"></script>
+</body>
+</html>

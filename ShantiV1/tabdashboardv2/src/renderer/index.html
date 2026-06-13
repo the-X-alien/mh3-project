@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Tab Dashboard</title>
+  <link rel="stylesheet" href="../../src/renderer/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div id="permission-banner" class="permission-banner hidden">
+      <div class="banner-text">
+        <strong>Accessibility permission required</strong><br>
+        Tab Dashboard needs Accessibility access to read browser window titles.
+      </div>
+      <button id="open-prefs-btn" class="open-prefs-btn">Open Settings →</button>
+    </div>
+
+    <header class="header">
+      <h1 class="title">Tab Dashboard</h1>
+      <button id="clear-btn" class="clear-btn">Clear Session</button>
+    </header>
+    <p class="subtitle">Switch to Chrome/Firefox/Safari/Edge — tabs appear here within 2 seconds</p>
+
+    <div id="chart-section" class="chart-section hidden">
+      <div id="chart-container"></div>
+    </div>
+
+    <div id="tabs-section" class="tabs-section hidden">
+      <div id="toggle-tabs" class="toggle-tabs">
+        <span class="toggle-label">Tab History</span>
+        <span id="toggle-count" class="toggle-count">0</span>
+        <span id="toggle-icon" class="toggle-icon">▾</span>
+      </div>
+      <div id="tabs-collapse" class="tabs-collapse">
+        <div id="tab-list" class="tab-list">
+          <p class="empty-state">No tabs captured yet. Switch to a browser tab to start tracking.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../../dist/renderer/dashboard.js"></script>
+</body>
+</html>
