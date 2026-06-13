@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Mental Tachometer — Cognitive Overload</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: radial-gradient(ellipse at center, rgba(230,168,23,0.12) 0%, #000000 70%);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(16px);
+    }
+    .card {
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid #4d4d4d;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    .icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(230,168,23,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+      margin-bottom: 8px;
+    }
+    h1 i { font-style: italic; color: #e6a817; }
+    p {
+      color: #999;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .faults {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .fault {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #e6a817;
+      background: rgba(230,168,23,0.08);
+      border: 1px solid rgba(230,168,23,0.2);
+      border-radius: 5px;
+      padding: 4px 8px;
+    }
+    .breathing-area {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid #4d4d4d;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .breathing-circle {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      border: 2px solid #343755;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 4s ease-in-out;
+    }
+    .breathing-circle.inhale { transform: scale(1.4); }
+    .breathing-circle.exhale { transform: scale(1); }
+    .breathing-inner {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #343755;
+      opacity: 0.5;
+    }
+    .breathing-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+    }
+    .timer {
+      font-family: 'Space Mono', monospace;
+      font-size: 28px;
+      color: #fff;
+      margin: 8px 0 2px;
+    }
+    .timer-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 32px;
+      border: none;
+      border-radius: 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      background: #343755;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #404465; }
+    .btn:disabled { opacity: 0.3; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">⚠</div>
+    <h1>Cognitive <i>Overload</i></h1>
+    <p>Your Cognitive Load Index has exceeded the safe threshold. A decompression break is required.</p>
+
+    <div class="faults" id="faults"></div>
+
+    <div class="breathing-area">
+      <div class="breathing-circle" id="breathingCircle">
+        <div class="breathing-inner"></div>
+      </div>
+      <div class="breathing-label" id="breathingLabel">Inhale...</div>
+      <div class="timer" id="timer">5:00</div>
+      <div class="timer-label">Decompression Timer</div>
+    </div>
+
+    <button class="btn" id="acceptBtn">Accept &amp; Reset</button>
+  </div>
+
+  <script>
+    const breathingCircle = document.getElementById('breathingCircle')
+    const breathingLabel = document.getElementById('breathingLabel')
+    const faultsEl = document.getElementById('faults')
+    const timerEl = document.getElementById('timer')
+    const acceptBtn = document.getElementById('acceptBtn')
+
+    let seconds = 300
+    let timerInterval = null
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        seconds--
+        if (seconds <= 0) { clearInterval(timerInterval); seconds = 0 }
+        const m = Math.floor(seconds / 60)
+        const s = seconds % 60
+        timerEl.textContent = m + ':' + s.toString().padStart(2, '0')
+      }, 1000)
+    }
+
+    // Breathing cycle
+    setInterval(() => {
+      breathingCircle.classList.remove('inhale', 'exhale')
+      breathingLabel.textContent = 'Inhale...'
+      setTimeout(() => { breathingCircle.classList.add('inhale') }, 50)
+      setTimeout(() => { breathingLabel.textContent = 'Hold...' }, 4000)
+      setTimeout(() => {
+        breathingCircle.classList.remove('inhale')
+        breathingCircle.classList.add('exhale')
+        breathingLabel.textContent = 'Exhale...'
+      }, 6000)
+      setTimeout(() => { breathingCircle.classList.remove('exhale') }, 10000)
+    }, 10000)
+
+    // Start first inhale
+    setTimeout(() => breathingCircle.classList.add('inhale'), 100)
+    startTimer()
+
+    // Load fault codes from background
+    chrome.runtime.sendMessage({ type: 'get-state' }, (response) => {
+      if (response?.state) {
+        const state = response.state
+        const codes = ['ERR_COGNITIVE_SATURATION']
+        if (state.tabSwitchCount > 3) codes.push('ERR_CONTEXT_THRASHING')
+        if (state.deleteSpikeActive) codes.push('ERR_DELETE_SPIKE')
+        if (state.idleMinutes > 5) codes.push('ERR_MICRO_STUTTER')
+        faultsEl.innerHTML = codes.map(c => '<span class="fault">FAULT CODE: ' + c + '</span>').join('')
+      }
+    })
+
+    // Accept and reset
+    acceptBtn.addEventListener('click', () => {
+      acceptBtn.disabled = true
+      acceptBtn.textContent = 'Resetting...'
+      chrome.runtime.sendMessage({ type: 'reset-overload' }, () => {
+        window.close()
+      })
+    })
+  </script>
+</body>
+</html>

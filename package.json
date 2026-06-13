@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "extension:pack": "powershell -NoProfile -Command \"$d='extension-dist'; if(Test-Path $d){Remove-Item -Recurse -Force $d}; Copy-Item -Recurse extension $d; Compress-Archive -Path \\\"$d/*\\\" -DestinationPath \\\"$d/mental-tachometer.zip\\\"; Write-Host \\\"Packaged: $d/mental-tachometer.zip\\\"\""
   },
   "dependencies": {
     "@radix-ui/react-slider": "^1.2.0",

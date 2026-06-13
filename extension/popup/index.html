@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=360" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>Mental Tachometer</title>
+</head>
+<body>
+  <!-- ── Header ── -->
+  <header>
+    <span class="logo">Mental <i>Tachometer</i></span>
+    <span class="status-dot" id="statusDot"></span>
+  </header>
+
+  <!-- ── CLI Gauge ── -->
+  <section class="gauge-section">
+    <div class="gauge-container">
+      <svg class="gauge-ring" viewBox="0 0 120 120">
+        <circle class="gauge-bg" cx="60" cy="60" r="50" fill="none" stroke-width="6"/>
+        <circle class="gauge-fill" id="gaugeFill" cx="60" cy="60" r="50" fill="none"
+          stroke-width="6" stroke-linecap="round"
+          stroke-dasharray="314" stroke-dashoffset="314"
+          transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="gauge-center">
+        <span class="gauge-value" id="gaugeValue">0</span>
+        <span class="gauge-label">CLI</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Telemetry Stats ── -->
+  <section class="stats">
+    <div class="stat">
+      <span class="stat-value" id="tabCount">0</span>
+      <span class="stat-label">Tab Switches</span>
+    </div>
+    <div class="stat">
+      <span class="stat-dot-label" id="deleteStatus">○</span>
+      <span class="stat-label">Delete Spike</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="idleMinutes">0</span>
+      <span class="stat-label">Idle (min)</span>
+    </div>
+  </section>
+
+  <!-- ── Fault Codes (hidden by default) ── -->
+  <div class="fault-bar" id="faultBar" style="display:none">
+    <div class="fault-title">FAULT CODES</div>
+    <div id="faultList"></div>
+  </div>
+
+  <!-- ── Actions ── -->
+  <section class="actions">
+    <button class="btn btn-primary" id="checkInBtn">Daily Check-In</button>
+  </section>
+
+  <!-- ── Overload Panel (hidden by default) ── -->
+  <section class="overload-panel" id="overloadPanel" style="display:none">
+    <div class="overload-header">⚠ Cognitive Overload</div>
+    <div class="breathing-circle" id="breathingCircle">
+      <div class="breathing-inner"></div>
+    </div>
+    <div class="breathing-text" id="breathingText">Inhale...</div>
+    <button class="btn btn-accent" id="resetBtn">Accept &amp; Reset</button>
+  </section>
+
+  <!-- ── Settings ── -->
+  <section class="settings">
+    <div class="settings-header">Settings</div>
+
+    <div class="setting">
+      <label class="setting-label">Trusted Contact</label>
+      <input type="email" class="input" id="contactInput" placeholder="friend@example.com" />
+      <button class="btn btn-secondary" id="saveContactBtn">Save</button>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label">Enable Nudge</label>
+      <label class="toggle">
+        <input type="checkbox" id="optInToggle" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <details class="sliders-details">
+      <summary class="setting-label" style="cursor:pointer">CLI Formula Settings</summary>
+      <div class="setting slider-setting">
+        <label class="setting-label-sm">Task Complexity</label>
+        <input type="range" class="slider" id="taskSlider" min="1" max="10" value="5" />
+        <span class="slider-value" id="taskValue">5</span>
+      </div>
+      <div class="setting slider-setting">
+        <label class="setting-label-sm">Work Hours</label>
+        <input type="range" class="slider" id="workSlider" min="0" max="16" value="4" />
+        <span class="slider-value" id="workValue">4</span>
+      </div>
+      <div class="setting slider-setting">
+        <label class="setting-label-sm">Sleep Hours</label>
+        <input type="range" class="slider" id="sleepSlider" min="0" max="12" value="7" />
+        <span class="slider-value" id="sleepValue">7</span>
+      </div>
+    </details>
+  </section>
+
+  <!-- ── Nudge Status ── -->
+  <div class="nudge-status" id="nudgeStatus" style="display:none">
+    <span class="nudge-dot" id="nudgeDot"></span>
+    <span id="nudgeText">Nudge sent. No raw data shared — just a light.</span>
+  </div>
+
+  <footer>
+    Mental Tachometer v1.0 — Privacy-first cognitive monitoring
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
