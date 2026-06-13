@@ -6,13 +6,12 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && tsc -p electron/tsconfig.json && electron . --dev\"",
     "build": "tsc -b && vite build",
-    "build:electron": "tsc -p electron/tsconfig.json && vite build",
+    "build:electron": "tsc -p electron/tsconfig.json && node -e \"require('fs').cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true})\"",
+    "electron:start": "tsc -p electron/tsconfig.json && node -e \"require('fs').cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true})\" && electron .",
     "preview": "vite preview",
-    "electron:start": "tsc -p electron/tsconfig.json && electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "pack": "npm run build:electron && electron-builder --dir",
+    "dist": "npm run build:electron && electron-builder"
   },
   "build": {
     "appId": "com.shanti.app",
@@ -22,7 +21,6 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*",
       "dist-electron/**/*"
     ],
     "publish": {

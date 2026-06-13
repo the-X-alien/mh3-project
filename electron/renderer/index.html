@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Shanti</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />
+          </svg>
+        </div>
+        <h1 class="title">Shanti</h1>
+      </div>
+      <button id="clear-btn" class="clear-btn">Clear</button>
+    </div>
+    <p class="subtitle">Tab tracker — switch to any browser to begin</p>
+
+    <div id="permission-banner" class="permission-banner hidden">
+      <div class="banner-text">
+        <strong>Accessibility permission required</strong><br />
+        Shanti needs Accessibility access to read browser window titles.
+      </div>
+      <button id="open-prefs-btn" class="open-prefs-btn">Open Settings &rarr;</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-tabs">0</div>
+        <div class="stat-label">Tabs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-switches">0</div>
+        <div class="stat-label">Switches</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-browsers">0</div>
+        <div class="stat-label">Browsers</div>
+      </div>
+    </div>
+
+    <div id="chart-section" class="chart-section" style="display:none">
+      <div id="chart-container"></div>
+    </div>
+
+    <div class="toggle-tabs" id="toggle-tabs">
+      <span class="toggle-label">Tab History</span>
+      <span id="toggle-count" class="toggle-count">0</span>
+      <span id="toggle-icon" class="toggle-icon">&#9662;</span>
+    </div>
+
+    <div class="tab-list-wrap open" id="tab-list-wrap">
+      <div id="tab-list" class="tab-list">
+        <p class="empty-state">No tabs captured yet. Switch to a browser tab to start tracking.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p class="footer-text">Shanti &mdash; privacy-first wellness companion</p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
