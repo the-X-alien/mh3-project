@@ -255,14 +255,35 @@ function renderLoneliness(data: LonelinessData): void {
 // ── Survey ──
 
 const SURVEY_QUESTIONS = [
-  { id: "stress-level", text: "Current stress level?", em: "(1 = relaxed, 5 = overwhelmed)", options: ["1", "2", "3", "4", "5"] },
-  { id: "anxiety", text: "Feeling anxious today?", options: ["Not at all", "A little", "Moderately", "Very"] },
-  { id: "social", text: "Meaningful social interaction today?", options: ["Yes", "No"] },
-  { id: "energy", text: "Energy level?", options: ["Low", "Medium", "High"] },
-  { id: "overwhelm", text: "Overwhelmed by workload?", options: ["Not at all", "A little", "Somewhat", "Very"] },
-  { id: "break", text: "Taken a break in the last 2 hours?", options: ["Yes", "No"] },
-  { id: "sleep", text: "Sleep quality last night?", options: ["Poor", "Fair", "Good"] },
+  { id: "stress-level", text: "How would you rate your current stress level?", em: "(1 = relaxed, 5 = overwhelmed)", options: ["1", "2", "3", "4", "5"] },
+  { id: "anxiety",      text: "Have you felt anxious today?",                  em: "",                              options: ["Not at all", "A little", "Moderately", "Very"] },
+  { id: "social",       text: "Have you had meaningful social interaction today?", em: "",                          options: ["Yes", "No"] },
+  { id: "energy",       text: "How is your energy level?",                     em: "",                              options: ["Low", "Medium", "High"] },
+  { id: "overwhelm",    text: "Are you feeling overwhelmed by your workload?",  em: "",                              options: ["Not at all", "A little", "Somewhat", "Very"] },
+  { id: "break",        text: "Have you taken a break in the last 2 hours?",   em: "",                              options: ["Yes", "No"] },
+  { id: "sleep",        text: "How was your sleep quality last night?",         em: "",                              options: ["Poor", "Fair", "Good"] },
 ];
+
+// Maps each answer to a 0–100 stress score contribution
+const ANSWER_SCORES: Record<string, Record<string, number>> = {
+  "stress-level": { "1": 10, "2": 25, "3": 50, "4": 70, "5": 90 },
+  "anxiety":      { "Not at all": 0, "A little": 15, "Moderately": 40, "Very": 70 },
+  "social":       { "Yes": 0, "No": 20 },
+  "energy":       { "High": 0, "Medium": 15, "Low": 35 },
+  "overwhelm":    { "Not at all": 0, "A little": 15, "Somewhat": 35, "Very": 60 },
+  "break":        { "Yes": 0, "No": 20 },
+  "sleep":        { "Good": 0, "Fair": 15, "Poor": 35 },
+};
+// Weights for each question (must sum to 1)
+const WEIGHTS: Record<string, number> = {
+  "stress-level": 0.30,
+  "anxiety":      0.20,
+  "social":       0.10,
+  "energy":       0.10,
+  "overwhelm":    0.15,
+  "break":        0.05,
+  "sleep":        0.10,
+};
 
 let surveyAnswers: Record<string, string> = {};
 
@@ -273,17 +294,17 @@ function openSurvey(): void {
   surveyAnswers = {};
   container.innerHTML = SURVEY_QUESTIONS.map(q => `
     <div class="survey-question">
-      <div class="survey-q-text">${q.text} <span class="survey-em">${q.em || ""}</span></div>
-      <div class="survey-q-options" data-q="${q.id}">
-        ${q.options.map(o => `<span class="survey-opt" data-value="${o}">${o}</span>`).join("")}
+      <div class="survey-q-text">${q.text}${q.em ? ` <span class="survey-q-em">${q.em}</span>` : ""}</div>
+      <div class="survey-options" data-q="${q.id}">
+        ${q.options.map(o => `<button class="survey-option" data-value="${o}">${o}</button>`).join("")}
       </div>
     </div>
   `).join("");
-  container.querySelectorAll(".survey-opt").forEach(btn => {
+  container.querySelectorAll(".survey-option").forEach(btn => {
     btn.addEventListener("click", () => {
       const parent = btn.parentElement;
       if (!parent) return;
-      parent.querySelectorAll(".survey-opt").forEach(b => b.classList.remove("selected"));
+      parent.querySelectorAll(".survey-option").forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
       surveyAnswers[parent.dataset.q || ""] = (btn as HTMLElement).dataset.value || "";
     });
@@ -296,46 +317,35 @@ function cancelSurvey(): void {
 }
 
 async function submitSurvey(): Promise<void> {
-  const answered = Object.keys(surveyAnswers).length;
-  if (answered < SURVEY_QUESTIONS.length) return;
+  if (Object.keys(surveyAnswers).length < SURVEY_QUESTIONS.length) {
+    showNotification("Please answer all questions before submitting.");
+    return;
+  }
 
-  const stressDelta = (Number(surveyAnswers["stress-level"]) || 3) - 3;
-  const anxietyDelta: Record<string, number> = { "Not at all": -8, "A little": 0, "Moderately": 8, "Very": 16 };
-  const socialDelta: Record<string, number> = { "Yes": -12, "No": 8 };
-  const energyDelta: Record<string, number> = { "Low": 8, "Medium": 0, "High": -8 };
-  const overwhelmDelta: Record<string, number> = { "Not at all": -8, "A little": 0, "Somewhat": 8, "Very": 16 };
-  const breakDelta: Record<string, number> = { "Yes": -8, "No": 8 };
-  const sleepDelta: Record<string, number> = { "Poor": 12, "Fair": 0, "Good": -8 };
+  // Weighted average across all answers → 0–100 stress score
+  let surveySore = 0;
+  for (const q of SURVEY_QUESTIONS) {
+    const answerScore = ANSWER_SCORES[q.id]?.[surveyAnswers[q.id]] ?? 50;
+    surveySore += answerScore * WEIGHTS[q.id];
+  }
+  const finalScore = Math.round(Math.max(0, Math.min(100, surveySore)));
 
-  const adjustment = [
-    stressDelta * 5,
-    anxietyDelta[surveyAnswers["anxiety"]] || 0,
-    socialDelta[surveyAnswers["social"]] || 0,
-    energyDelta[surveyAnswers["energy"]] || 0,
-    overwhelmDelta[surveyAnswers["overwhelm"]] || 0,
-    breakDelta[surveyAnswers["break"]] || 0,
-    sleepDelta[surveyAnswers["sleep"]] || 0,
-  ].reduce((a, b) => a + b, 0);
+  // Blend 50/50 with the live sensor score so survey has direct impact
+  const live = await window.tabDashboard.getStress();
+  const blended = Math.round((live.score + finalScore) / 2);
+  await window.tabDashboard.setSurveyAdjustment(blended - live.score);
 
-  await window.tabDashboard.setSurveyAdjustment(adjustment);
-
-  // Post to website dashboard so it shows in History
+  // Push to website history
   try {
-    const stress = await window.tabDashboard.getStress();
     await fetch("https://mh3-project.vercel.app/api/stress-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        score: Math.max(0, Math.min(100, stress.score + adjustment)),
-        factors: stress.factors,
-        surveyAnswers,
-        source: "desktop-checkin",
-      }),
+      body: JSON.stringify({ score: blended, factors: live.factors, surveyAnswers, source: "desktop-checkin" }),
     });
   } catch { /* best-effort */ }
 
   document.getElementById("survey-overlay")?.classList.add("hidden");
-  showNotification("Check-in submitted — stress score updated.");
+  showNotification(`Check-in done — stress score set to ${blended}/100`);
 }
 
 // ── Breathing ──
@@ -391,12 +401,7 @@ function startBreathing(): void {
 
 function setupAutoBreath(): void {
   window.tabDashboard.onAutoBreath(() => startBreathing());
-  document.getElementById("alarm-dismiss")?.addEventListener("click", () => {
-    if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
-    if (warningTimeout) { clearInterval(warningTimeout as unknown as number); warningTimeout = null; }
-    document.getElementById("alarm-overlay")?.classList.add("hidden");
-    window.tabDashboard.clearAlarm();
-  });
+  // No dismiss — user must complete the full 25-second breathing cycle.
 }
 
 // ── Tabs ──
@@ -457,8 +462,8 @@ function setupToggle(): void {
   const icon = document.getElementById("toggle-icon");
   if (toggle && collapse && icon) {
     toggle.addEventListener("click", () => {
-      collapse.classList.toggle("open");
-      icon.classList.toggle("open");
+      const isHidden = collapse.classList.toggle("hidden");
+      icon.style.transform = isHidden ? "" : "rotate(180deg)";
     });
   }
 }
