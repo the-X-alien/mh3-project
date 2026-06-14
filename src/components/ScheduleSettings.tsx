@@ -12,13 +12,54 @@ const frequencies: { value: EmailFrequency; label: string; desc: string }[] = [
   { value: 'yearly', label: 'Yearly', desc: 'Once per year' },
 ]
 
+const emailValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+
 export default function ScheduleSettings() {
   const { state, dispatch } = useWellness()
   const [saved, setSaved] = useState(false)
+  const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [testMsg, setTestMsg] = useState('')
 
   const handleSave = () => {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleSendTest = async () => {
+    if (!emailValid(state.email)) return
+    setTestStatus('sending')
+    setTestMsg('')
+    try {
+      const res = await fetch('/api/send-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: state.email,
+          name: (user?.user_metadata?.name as string) || undefined,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setTestStatus('error')
+        setTestMsg(data.error || 'Could not send. Is Resend configured?')
+        return
+      }
+      setTestStatus('sent')
+      setTestMsg('Check-in sent — look in your inbox.')
+    } catch {
+      setTestStatus('error')
+      setTestMsg('Network error sending the test email.')
+    } finally {
+      setTimeout(() => setTestStatus('idle'), 4000)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 size={16} className="animate-spin text-fog" />
+      </div>
+    )
   }
 
   return (
@@ -43,9 +84,7 @@ export default function ScheduleSettings() {
                   : 'bg-glass border border-white/5 hover:border-white/10'
               }`}
             >
-              <p className={`font-body text-sm mb-0.5 ${isActive ? 'text-pure' : 'text-fog'}`}>
-                {f.label}
-              </p>
+              <p className={`font-body text-sm mb-0.5 ${isActive ? 'text-pure' : 'text-fog'}`}>{f.label}</p>
               <p className="font-mono text-[10px] text-fog/60">{f.desc}</p>
             </motion.button>
           )
@@ -53,14 +92,17 @@ export default function ScheduleSettings() {
       </div>
 
       <div>
-        <label className="block font-body text-xs text-fog mb-1.5">Email address</label>
+        <label className="block font-body text-xs text-fog mb-1.5">Send check-ins to</label>
         <input
           type="email"
-          placeholder="you@example.com"
           value={state.email}
           onChange={(e) => dispatch({ type: 'SET_EMAIL', value: e.target.value })}
+          placeholder="you@example.com"
           className="w-full px-4 py-2.5 rounded-xl bg-glass border border-white/5 text-pure font-body text-sm placeholder:text-fog/30 outline-none focus:border-amber/40 transition-colors"
         />
+        {state.email && !emailValid(state.email) && (
+          <p className="mt-1.5 font-body text-[11px] text-amber/80">Enter a valid email address.</p>
+        )}
       </div>
 
       <motion.button

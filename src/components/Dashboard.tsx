@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion'
-import { Wind, Brain, Sparkles, Activity, Download, RefreshCw, Loader2 } from 'lucide-react'
+import { Wind, Brain, Sparkles, Activity, Download, Loader2, LineChart, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useWellness } from '@/context/WellnessContext'
-import ScheduleSettings from './ScheduleSettings'
+import { useAuth } from './AuthProvider'
+import { logWellnessEvent } from '@/lib/wellness'
 import AiInsights from './AiInsights'
+import TabViewer from './TabViewer'
 import { useState, useEffect } from 'react'
 
 function UpdateManager() {
@@ -74,11 +77,23 @@ function UpdateManager() {
 
 export default function Dashboard() {
   const { state, startBreathing, addCheckIn, resetSession } = useWellness()
+  const { user } = useAuth()
 
   const stressColor = state.stress < 30 ? 'text-green' : state.stress < 60 ? 'text-amber' : 'text-amber'
 
+  const handleBreathe = () => {
+    startBreathing()
+    addCheckIn()
+    if (user) void logWellnessEvent(user.id, 'breathing', state.stress, { source: 'dashboard' })
+  }
+
+  const handleReset = () => {
+    if (user) void logWellnessEvent(user.id, 'reset', state.stress)
+    resetSession()
+  }
+
   return (
-    <div className="flex flex-col gap-8 p-6 max-w-lg mx-auto pt-16">
+    <div className="flex flex-col gap-8 max-w-lg mx-auto pt-8">
       <header className="text-center space-y-2">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
@@ -120,7 +135,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => { startBreathing(); addCheckIn() }}
+          onClick={handleBreathe}
           className="flex flex-col items-center gap-2 px-4 py-5 rounded-2xl bg-glass border border-white/5 hover:border-amber/20 transition-all group"
         >
           <Wind size={22} className="text-amber group-hover:scale-110 transition-transform" />
@@ -128,7 +143,7 @@ export default function Dashboard() {
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => resetSession()}
+          onClick={handleReset}
           className="flex flex-col items-center gap-2 px-4 py-5 rounded-2xl bg-glass border border-white/5 hover:border-white/10 transition-all group"
         >
           <Sparkles size={22} className="text-fog group-hover:text-pure transition-colors" />
@@ -138,11 +153,23 @@ export default function Dashboard() {
 
       <AiInsights />
 
+      <TabViewer />
+
       <UpdateManager />
 
-      <div className="rounded-2xl bg-glass border border-white/5 p-5">
-        <ScheduleSettings />
-      </div>
+      <Link
+        to="/history"
+        className="flex items-center justify-between rounded-2xl bg-glass border border-white/5 px-5 py-4 hover:border-amber/20 transition-all group"
+      >
+        <div className="flex items-center gap-3">
+          <LineChart size={18} className="text-amber" />
+          <div>
+            <p className="font-body text-sm text-pure">View your history</p>
+            <p className="font-body text-xs text-fog/60">See stress trends over time</p>
+          </div>
+        </div>
+        <ArrowRight size={16} className="text-fog/40 group-hover:text-amber group-hover:translate-x-0.5 transition-all" />
+      </Link>
 
       <div className="rounded-2xl bg-glass border border-white/5 p-5 space-y-3">
         <h3 className="font-cursive text-lg text-pure">Session Activity</h3>

@@ -15,6 +15,7 @@ export default {
         violet: 'var(--color-violet)',
         amber: 'var(--color-amber)',
         green: 'var(--color-green)',
+        glass: 'var(--surface-editor)',
         // Light theme (Air)
         sky: 'var(--color-sky)',
         action: 'var(--color-action)',
