@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:electron": "tsc -p electron/tsconfig.json && node -e \"require('fs').cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true})\"",
-    "electron:start": "tsc -p electron/tsconfig.json && node -e \"require('fs').cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true})\" && electron .",
+    "build:electron": "tsc -p electron/tsconfig.json && node -e \"const{cpSync}=require('fs');cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true,filter:(s)=>!s.endsWith('.ts')})\"",
+    "electron:start": "tsc -p electron/tsconfig.json && node -e \"const{cpSync}=require('fs');cpSync('electron/renderer','dist-electron/renderer',{recursive:true,force:true,filter:(s)=>!s.endsWith('.ts')})\" && electron .",
     "preview": "vite preview",
     "pack": "npm run build:electron && electron-builder --dir",
     "dist": "npm run build:electron && electron-builder"
@@ -60,7 +60,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Shanti"
+      "shortcutName": "Shanti",
+      "artifactName": "Shanti-Setup-${version}.exe"
+    },
+    "dmg": {
+      "artifactName": "Shanti-${version}-${arch}.dmg"
     }
   },
   "dependencies": {

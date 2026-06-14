@@ -12,6 +12,7 @@
   --text: #fff;
   --muted: rgba(255,255,255,0.5);
   --faint: rgba(255,255,255,0.25);
+  --accent: #e6a817;
   --amber: #e6a817;
   --amber-bg: rgba(230,168,23,0.1);
   --amber-border: rgba(230,168,23,0.3);
@@ -47,23 +48,6 @@ body {
   margin-bottom: 4px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--amber), rgba(230,168,23,0.6));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
 .title {
   font-size: 17px;
   font-weight: 600;
@@ -74,8 +58,26 @@ body {
   color: var(--muted);
   font-size: 12px;
   margin-bottom: 16px;
-  padding-left: 36px;
 }
+
+.header-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.survey-btn,
+.rage-btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  background: transparent;
+  color: var(--muted);
+}
+.survey-btn:hover { border-color: var(--amber); color: var(--amber); }
+.rage-btn:hover   { border-color: #FF5252; color: #FF5252; }
 
 .clear-btn {
   background: transparent;
@@ -377,4 +379,211 @@ body {
 .footer-text {
   font-size: 10px;
   color: var(--faint);
+}
+
+/* ─── Utility ─── */
+
+.hidden { display: none !important; }
+
+/* ─── Tab collapse (v2 naming) ─── */
+
+.tabs-section { margin-bottom: 12px; }
+
+.tabs-collapse {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.tabs-collapse.open { max-height: 3000px; }
+
+.browser-badge.opera { background: rgba(255,27,45,0.12); color: #ff1b2d; }
+
+.empty-session {
+  color: var(--faint);
+  font-size: 12px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ─── Stress Section ─── */
+
+.stress-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.stress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.stress-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.stress-value { font-size: 28px; font-weight: 700; color: var(--amber); font-family: "Space Mono", ui-monospace, monospace; transition: color 0.4s; }
+.stress-graph-wrap { margin-bottom: 10px; }
+.stress-graph { width: 100%; height: 60px; display: block; }
+.stress-factors {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.factor { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.factor-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+.factor-val { font-size: 12px; font-weight: 600; color: var(--text); font-family: "Space Mono", ui-monospace, monospace; }
+.sleep-slider { width: 100%; accent-color: var(--amber); cursor: pointer; }
+
+/* ─── Loneliness Section ─── */
+
+.loneliness-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.section-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+.loneliness-body { display: flex; flex-direction: column; gap: 6px; }
+.loneliness-status { font-size: 13px; font-weight: 600; }
+.loneliness-detail { font-size: 11px; color: var(--muted); }
+.loneliness-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.loneliness-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.loneliness-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s, background 0.5s; }
+.loneliness-cli { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.fault-banner {
+  background: rgba(255,82,82,0.12);
+  border: 1px solid rgba(255,82,82,0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #FF5252;
+  line-height: 1.5;
+}
+
+/* ─── Trusted Contacts ─── */
+
+.contacts-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.contacts-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.contact-select {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+}
+.contact-action-btn, .contacts-configure-btn {
+  background: rgba(230,168,23,0.1); border: 1px solid var(--amber-border);
+  color: var(--amber); border-radius: 8px; padding: 6px 12px; font-size: 11px; cursor: pointer; white-space: nowrap;
+  transition: background 0.15s;
+}
+.contact-action-btn:hover, .contacts-configure-btn:hover { background: rgba(230,168,23,0.2); }
+.contacts-configure-btn { background: transparent; border-color: var(--border); color: var(--muted); }
+.contacts-configure-btn:hover { border-color: var(--amber); color: var(--amber); background: transparent; }
+.contact-message-area { margin-top: 8px; }
+.contact-no-method { font-size: 11px; color: #FF5252; padding: 6px 0; font-weight: 600; letter-spacing: 0.05em; }
+.contact-message-input-area { display: flex; flex-direction: column; gap: 6px; }
+.contact-message-input {
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 12px; resize: vertical; font-family: inherit;
+}
+.contact-send-btn {
+  align-self: flex-end; background: var(--amber); border: none; color: #000;
+  border-radius: 8px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.contact-send-btn:hover { opacity: 0.85; }
+
+/* ─── Contact Config Overlay ─── */
+
+.contact-config-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+}
+.contact-config-content {
+  background: #111; border: 1px solid var(--border); border-radius: 14px;
+  padding: 24px; width: 320px; max-width: 90vw;
+}
+.contact-config-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.contact-config-fields { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.contact-config-input {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; font-family: inherit;
+}
+.contact-config-input:focus { outline: none; border-color: var(--amber); }
+.contact-config-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.contact-config-cancel {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer;
+}
+.contact-config-add {
+  background: var(--amber); border: none; color: #000;
+  border-radius: 8px; padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.contact-config-add:hover { opacity: 0.85; }
+
+/* ─── Breathing Alarm Overlay ─── */
+
+.alarm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+}
+.alarm-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.breath-circle {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,168,23,0.4) 0%, rgba(230,168,23,0.1) 60%, transparent 100%);
+  border: 2px solid var(--amber);
+  transform: scale(0.4);
+  transition: transform 1s ease-in-out;
+}
+.breath-timer { font-size: 48px; font-weight: 700; font-family: "Space Mono", ui-monospace, monospace; color: var(--text); }
+.breath-text { font-size: 16px; color: var(--muted); text-align: center; max-width: 260px; line-height: 1.5; }
+
+/* ─── Survey Overlay ─── */
+
+.survey-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 250;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.survey-content {
+  background: #111; border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto;
+}
+.survey-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.survey-cancel { cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+.survey-cancel:hover { color: var(--text); }
+.survey-questions { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+.survey-question { display: flex; flex-direction: column; gap: 8px; }
+.survey-q-text { font-size: 13px; line-height: 1.4; }
+.survey-em { font-size: 11px; color: var(--muted); }
+.survey-q-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.survey-opt {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.survey-opt:hover { border-color: var(--amber); }
+.survey-opt.selected { background: rgba(230,168,23,0.15); border-color: var(--amber); color: var(--amber); font-weight: 600; }
+.survey-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.survey-cancel-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 8px; padding: 7px 16px; font-size: 12px; cursor: pointer;
+}
+.survey-submit {
+  background: var(--amber); border: none; color: #000;
+  border-radius: 8px; padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.survey-submit:hover { opacity: 0.85; }
+
+/* ─── Active Fault Banner ─── */
+
+.active-fault {
+  background: rgba(255,82,82,0.12); border: 1px solid rgba(255,82,82,0.3);
+  border-radius: 10px; padding: 10px 14px; font-size: 11px; color: #FF5252;
+  line-height: 1.5; margin-top: 12px;
 }
