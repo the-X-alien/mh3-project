@@ -316,36 +316,67 @@ function cancelSurvey(): void {
   document.getElementById("survey-overlay")?.classList.add("hidden");
 }
 
+function computeLocalSurveyScore(answers: Record<string, string>): number {
+  let score = 0;
+  for (const q of SURVEY_QUESTIONS) {
+    score += (ANSWER_SCORES[q.id]?.[answers[q.id]] ?? 50) * WEIGHTS[q.id];
+  }
+  return Math.round(Math.max(0, Math.min(100, score)));
+}
+
 async function submitSurvey(): Promise<void> {
+  const errEl = document.getElementById("survey-error") as HTMLElement | null;
+  const btn = document.getElementById("survey-submit") as HTMLButtonElement | null;
+
+  // Inline validation — show error in overlay instead of silent fail
   if (Object.keys(surveyAnswers).length < SURVEY_QUESTIONS.length) {
-    showNotification("Please answer all questions before submitting.");
+    if (errEl) errEl.style.display = "block";
     return;
   }
+  if (errEl) errEl.style.display = "none";
+  if (btn) { btn.textContent = "Sending…"; btn.disabled = true; }
 
-  // Weighted average across all answers → 0–100 stress score
-  let surveySore = 0;
-  for (const q of SURVEY_QUESTIONS) {
-    const answerScore = ANSWER_SCORES[q.id]?.[surveyAnswers[q.id]] ?? 50;
-    surveySore += answerScore * WEIGHTS[q.id];
-  }
-  const finalScore = Math.round(Math.max(0, Math.min(100, surveySore)));
-
-  // Blend 50/50 with the live sensor score so survey has direct impact
   const live = await window.tabDashboard.getStress();
-  const blended = Math.round((live.score + finalScore) / 2);
-  await window.tabDashboard.setSurveyAdjustment(blended - live.score);
 
-  // Push to website history
+  // Local fallback score (always computed, used if API fails)
+  const localScore = computeLocalSurveyScore(surveyAnswers);
+  // Blend 60% survey / 40% live sensors
+  const localBlended = Math.round(localScore * 0.6 + live.score * 0.4);
+
+  let finalScore = localBlended;
+
+  // Try to POST to website — get back server-computed score
   try {
-    await fetch("https://mh3-project.vercel.app/api/stress-log", {
+    const res = await fetch("https://mh3-project.vercel.app/api/stress-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ score: blended, factors: live.factors, surveyAnswers, source: "desktop-checkin" }),
+      body: JSON.stringify({
+        score: localBlended,
+        factors: live.factors,
+        surveyAnswers,
+        source: "desktop-checkin",
+      }),
     });
-  } catch { /* best-effort */ }
+    if (res.ok) {
+      const data = await res.json() as { score?: number };
+      if (typeof data.score === "number") finalScore = data.score;
+    }
+  } catch {
+    // Network unavailable — localBlended already set, continue silently
+  }
 
+  // Apply to desktop stress display
+  await window.tabDashboard.setSurveyAdjustment(finalScore - live.score);
+
+  if (btn) { btn.textContent = "Submit"; btn.disabled = false; }
   document.getElementById("survey-overlay")?.classList.add("hidden");
-  showNotification(`Check-in done — stress score set to ${blended}/100`);
+
+  // Update stress ring immediately
+  const updated = await window.tabDashboard.getStress();
+  const hist = await window.tabDashboard.getStressHistory();
+  renderStress(updated, hist);
+
+  showNotification(`Check-in done — stress score: ${finalScore}/100`);
 }
 
 // ── Breathing ──
