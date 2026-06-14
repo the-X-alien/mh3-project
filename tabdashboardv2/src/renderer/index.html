@@ -13,7 +13,7 @@
 </head>
 <body>
 
-  <!-- Alarm / breathing overlay -->
+  <!-- Breathing overlay (auto-triggered) -->
   <div id="alarm-overlay" class="overlay hidden">
     <div class="overlay-card">
       <p class="overlay-eyebrow">take a breath</p>
@@ -21,41 +21,6 @@
       <div id="breath-timer" class="breath-num">4</div>
       <p id="breath-text" class="breath-phase">Breathe in…</p>
       <button id="alarm-dismiss" class="btn-ghost" style="margin-top:24px">Dismiss</button>
-    </div>
-  </div>
-
-  <!-- Survey overlay -->
-  <div id="survey-overlay" class="overlay hidden">
-    <div class="overlay-card" style="max-width:380px;width:100%">
-      <div class="overlay-header">
-        <span class="overlay-title">Mental Health Check‑In</span>
-        <button id="survey-cancel" class="icon-btn">✕</button>
-      </div>
-      <div id="survey-questions" class="survey-questions"></div>
-      <div class="overlay-actions">
-        <button id="survey-cancel-btn" class="btn-ghost">Cancel</button>
-        <button id="survey-submit" class="btn-amber">Submit</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Contact config overlay -->
-  <div id="contact-config-overlay" class="overlay hidden">
-    <div class="overlay-card" style="max-width:360px;width:100%">
-      <div class="overlay-header">
-        <span class="overlay-title">Add Trusted Contact</span>
-        <button id="contact-config-cancel" class="icon-btn">✕</button>
-      </div>
-      <div class="field-stack">
-        <input id="contact-name-input"  class="field" type="text"  placeholder="Name" />
-        <input id="contact-role-input"  class="field" type="text"  placeholder="Role (e.g. Friend, Mentor)" />
-        <input id="contact-email-input" class="field" type="email" placeholder="Email" />
-        <input id="contact-phone-input" class="field" type="tel"   placeholder="Phone" />
-      </div>
-      <div class="overlay-actions">
-        <button id="contact-config-cancel2" class="btn-ghost">Cancel</button>
-        <button id="contact-config-add" class="btn-amber">Add Contact</button>
-      </div>
     </div>
   </div>
 
@@ -78,8 +43,7 @@
         <span class="brand-name">Shanti</span>
       </div>
       <div class="header-actions">
-        <button id="survey-btn" class="btn-ghost-sm">Check‑in</button>
-        <button id="rage-btn"   class="btn-ghost-sm rage">Rage Room</button>
+        <button id="rage-btn" class="btn-ghost-sm rage">Rage Room</button>
       </div>
     </header>
 
@@ -148,7 +112,7 @@
       </div>
     </section>
 
-    <!-- Loneliness -->
+    <!-- Social signal -->
     <section class="card hidden" id="loneliness-section">
       <div class="card-header-static">
         <span class="card-title">Social Signal</span>
@@ -165,29 +129,6 @@
         <div id="loneliness-fault" class="fault-banner hidden">
           <strong>ERR_SOCIAL_DEPRIVATION</strong><br>
           Your battery is low and you haven't connected with anyone today. Message someone you trust.
-        </div>
-      </div>
-    </section>
-
-    <!-- Trusted contacts -->
-    <section class="card hidden" id="contacts-section">
-      <div class="card-header-static">
-        <span class="card-title">Trusted Contacts</span>
-        <button id="contacts-configure-btn" class="btn-ghost-xs">+ Configure</button>
-      </div>
-      <div class="card-body">
-        <div class="contacts-row">
-          <select id="contact-select" class="field">
-            <option value="">— Select contact —</option>
-          </select>
-          <button id="contact-action-btn" class="btn-amber-sm">Contact</button>
-        </div>
-        <div id="contact-message-area" class="hidden" style="margin-top:10px">
-          <div id="contact-no-method" class="hidden fault-banner">NO CONTACT METHOD CONFIGURED</div>
-          <div id="contact-message-input-area" class="hidden">
-            <textarea id="contact-message-input" class="field" rows="3" placeholder="Type your message…"></textarea>
-            <button id="contact-send-btn" class="btn-amber" style="margin-top:6px;width:100%">Send</button>
-          </div>
         </div>
       </div>
     </section>

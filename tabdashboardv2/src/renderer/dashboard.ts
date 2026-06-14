@@ -20,10 +20,6 @@ interface FaultData {
   code: string; message: string;
 }
 
-interface Contact {
-  id: string; name: string; role: string; email: string; phone: string;
-}
-
 interface TabDashboardAPI {
   getTabs: () => Promise<TabSnapshot[]>;
   getPermission: () => Promise<boolean>;
@@ -40,18 +36,11 @@ interface TabDashboardAPI {
   onSocialUpdate: (cb: (data: LonelinessData) => void) => void;
   onFaultTriggered: (cb: (fault: FaultData) => void) => void;
   onAutoBreath: (cb: () => void) => void;
-  setSurveyAdjustment: (adj: number) => Promise<void>;
-  getSurveyAdjustment: () => Promise<number | null>;
   openRageRoom: () => void;
   getAlarmState: () => Promise<boolean>;
   clearAlarm: () => void;
   onAlarmState: (cb: (active: boolean) => void) => void;
   breathComplete: () => void;
-  getContacts: () => Promise<Contact[]>;
-  addContact: (c: Omit<Contact, "id">) => Promise<void>;
-  removeContact: (id: string) => Promise<void>;
-  contactPerson: (id: string, method: "email" | "sms") => void;
-  sendMessage: (id: string, message: string) => void;
   openWebDashboard: () => void;
 }
 
@@ -212,10 +201,18 @@ function renderStressGraph(history: StressPoint[]): void {
 
 function renderStress(data: StressPoint, history: StressPoint[]): void {
   const valEl = document.getElementById("stress-value");
+  const ringEl = document.getElementById("stress-ring");
+  const labelEl = document.getElementById("stress-label");
   const hrsEl = document.getElementById("factor-hours");
   const swEl = document.getElementById("factor-switches");
   const sitesEl = document.getElementById("factor-sites");
-  if (valEl) { valEl.textContent = String(data.score); valEl.style.color = data.score < 35 ? "#69F0AE" : data.score < 65 ? "#FFD54F" : "#FF5252"; }
+
+  const color = data.score < 35 ? "#2ecc71" : data.score < 65 ? "#e6a817" : "#e65032";
+  const label = data.score < 35 ? "Calm" : data.score < 65 ? "Moderate" : "High Stress";
+
+  if (valEl) { valEl.textContent = String(data.score); valEl.style.color = color; }
+  if (ringEl) ringEl.style.setProperty("--ring-color", color);
+  if (labelEl) { labelEl.textContent = label; labelEl.style.color = color; }
   if (hrsEl) hrsEl.textContent = `${data.factors.hoursWorked.toFixed(1)}h`;
   if (swEl) swEl.textContent = `${data.factors.switchRate.toFixed(1)}/min`;
   if (sitesEl) sitesEl.textContent = String(data.factors.uniqueSites);
@@ -241,98 +238,20 @@ function renderLoneliness(data: LonelinessData): void {
   detail.textContent = `Social: ${socialStr}  ·  Solitary: ${solitaryStr}`;
   cliEl.textContent = `${Math.round(data.cli)}% solitary`;
   barFill.style.width = `${Math.min(data.cli, 100)}%`;
-  barFill.style.background = data.cli > 60 ? "#FF5252" : data.cli > 40 ? "#FFD54F" : "#69F0AE";
+  barFill.style.background = data.cli > 60 ? "#e65032" : data.cli > 40 ? "#e6a817" : "#2ecc71";
 
   if (data.faultTriggered) {
-    status.textContent = "\u26A0 Social Deprivation Detected";
-    status.style.color = "#FF5252";
+    status.textContent = "⚠ Social Deprivation Detected";
+    status.style.color = "#e65032";
     fault.classList.remove("hidden");
   } else {
-    status.textContent = data.cli > 60 ? "\u26A0 Low Social Connection" : "\u2713 Socially Connected";
-    status.style.color = data.cli > 60 ? "#FFD54F" : "#69F0AE";
+    status.textContent = data.cli > 60 ? "⚠ Low Social Connection" : "✓ Socially Connected";
+    status.style.color = data.cli > 60 ? "#e6a817" : "#2ecc71";
     fault.classList.add("hidden");
   }
 }
 
-// ── Survey ──
-
-const SURVEY_QUESTIONS = [
-  { id: "stress-level", text: "How would you rate your current stress level?", em: "(1 = relaxed, 5 = overwhelmed)", options: ["1", "2", "3", "4", "5"] },
-  { id: "anxiety", text: "Have you felt anxious today?", options: ["Not at all", "A little", "Moderately", "Very"] },
-  { id: "social", text: "Have you had meaningful social interaction today?", options: ["Yes", "No"] },
-  { id: "energy", text: "How is your energy level?", options: ["Low", "Medium", "High"] },
-  { id: "overwhelm", text: "Are you feeling overwhelmed by your workload?", options: ["Not at all", "A little", "Somewhat", "Very"] },
-  { id: "break", text: "Have you taken a break in the last 2 hours?", options: ["Yes", "No"] },
-  { id: "sleep", text: "How was your sleep quality last night?", options: ["Poor", "Fair", "Good"] },
-];
-
-let surveyAnswers: Record<string, string> = {};
-
-function cancelSurvey(): void {
-  document.getElementById("survey-overlay")?.classList.add("hidden");
-}
-
-function openSurvey(): void {
-  const overlay = document.getElementById("survey-overlay");
-  const container = document.getElementById("survey-questions");
-  if (!overlay || !container) return;
-
-  surveyAnswers = {};
-
-  container.innerHTML = SURVEY_QUESTIONS.map(q => `
-    <div class="survey-question">
-      <div class="survey-q-text">${q.text} <span class="survey-em">${q.em || ""}</span></div>
-      <div class="survey-q-options" data-q="${q.id}">
-        ${q.options.map(o => `<span class="survey-opt" data-value="${o}">${o}</span>`).join("")}
-      </div>
-    </div>
-  `).join("");
-
-  container.querySelectorAll(".survey-opt").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const parent = btn.parentElement;
-      if (!parent) return;
-      parent.querySelectorAll(".survey-opt").forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      surveyAnswers[parent.dataset.q || ""] = (btn as HTMLElement).dataset.value || "";
-    });
-  });
-
-  overlay.classList.remove("hidden");
-}
-
-function submitSurvey(): void {
-  const api = window.tabDashboard;
-  const answered = Object.keys(surveyAnswers).length;
-  if (answered < SURVEY_QUESTIONS.length) return;
-
-  // Each answer maps to a stress adjustment delta (-X to +X)
-  const stressDelta = (Number(surveyAnswers["stress-level"]) || 3) - 3;  // -2 to +2 -> scale to -10 to +10
-  const anxietyDelta: Record<string, number> = { "Not at all": -8, "A little": 0, "Moderately": 8, "Very": 16 };
-  const socialDelta: Record<string, number> = { "Yes": -12, "No": 8 };
-  const energyDelta: Record<string, number> = { "Low": 8, "Medium": 0, "High": -8 };
-  const overwhelmDelta: Record<string, number> = { "Not at all": -8, "A little": 0, "Somewhat": 8, "Very": 16 };
-  const breakDelta: Record<string, number> = { "Yes": -8, "No": 8 };
-  const sleepDelta: Record<string, number> = { "Poor": 12, "Fair": 0, "Good": -8 };
-
-  const deltas = [
-    stressDelta * 5,
-    anxietyDelta[surveyAnswers["anxiety"]] || 0,
-    socialDelta[surveyAnswers["social"]] || 0,
-    energyDelta[surveyAnswers["energy"]] || 0,
-    overwhelmDelta[surveyAnswers["overwhelm"]] || 0,
-    breakDelta[surveyAnswers["break"]] || 0,
-    sleepDelta[surveyAnswers["sleep"]] || 0,
-  ];
-
-  const adjustment = deltas.reduce((a, b) => a + b, 0);
-  void api.setSurveyAdjustment(adjustment);
-
-  document.getElementById("survey-overlay")?.classList.add("hidden");
-  showNotification("Survey submitted. Stress score adjusted.");
-}
-
-// ── Breathing (auto-triggered only) ──
+// ── Breathing ──
 
 let breathInterval: ReturnType<typeof setInterval> | null = null;
 let warningTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -349,34 +268,26 @@ function startBreathing(): void {
 
   overlay.classList.remove("hidden");
   circle.style.transform = "scale(0.4)";
-
-  // Phase 1: 3-second warning
-  textEl.textContent = "Your Stress Levels are too high, please take a deep breath";
+  textEl.textContent = "Your stress levels are high — take a deep breath";
   timerEl.textContent = "3";
 
   let warningCount = 3;
   warningTimeout = setInterval(() => {
     warningCount--;
-    if (warningCount > 0) {
-      timerEl.textContent = String(warningCount);
-    }
+    if (warningCount > 0) timerEl.textContent = String(warningCount);
   }, 1000) as unknown as ReturnType<typeof setTimeout>;
 
-  // Phase 2: after 3 seconds, start the 25-second breathing cycle
   setTimeout(() => {
     if (warningTimeout) { clearInterval(warningTimeout as unknown as number); warningTimeout = null; }
-
     let remaining = 25;
-
     const tick = (): void => {
       const phase = 25 - remaining;
       const cycle = phase % 5;
       const inOut = cycle < 2.5;
       const progress = inOut ? cycle / 2.5 : 1 - (cycle - 2.5) / 2.5;
       circle.style.transform = `scale(${0.4 + progress * 0.6})`;
-      textEl.textContent = inOut ? "Breathe in\u2026" : "Breathe out\u2026";
+      textEl.textContent = inOut ? "Breathe in…" : "Breathe out…";
       timerEl.textContent = String(remaining);
-
       remaining--;
       if (remaining < 0) {
         if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
@@ -394,10 +305,9 @@ function startBreathing(): void {
 function setupAutoBreath(): void {
   window.tabDashboard.onAutoBreath(() => startBreathing());
   document.getElementById("alarm-dismiss")?.addEventListener("click", () => {
-    const overlay = document.getElementById("alarm-overlay");
     if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
     if (warningTimeout) { clearInterval(warningTimeout as unknown as number); warningTimeout = null; }
-    overlay?.classList.add("hidden");
+    document.getElementById("alarm-overlay")?.classList.add("hidden");
     window.tabDashboard.clearAlarm();
   });
 }
@@ -471,115 +381,6 @@ function setPermissionBanner(ok: boolean): void {
   if (banner) banner.classList.toggle("hidden", ok);
 }
 
-// ── Trusted Contacts ──
-
-let selectedContactId: string | null = null;
-
-function renderContactsDropdown(contacts: Contact[]): void {
-  const section = document.getElementById("contacts-section");
-  const select = document.getElementById("contact-select") as HTMLSelectElement | null;
-  if (!section || !select) return;
-
-  if (contacts.length === 0) {
-    section.classList.add("hidden");
-    return;
-  }
-  section.classList.remove("hidden");
-
-  const prev = selectedContactId;
-  select.innerHTML = `<option value="">-- Select Contact --</option>`;
-  for (const c of contacts) {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = `${c.name} — ${c.role}`;
-    if (c.id === prev) opt.selected = true;
-    select.appendChild(opt);
-  }
-  if (!prev || !contacts.some(c => c.id === prev)) {
-    selectedContactId = null;
-    select.value = "";
-  }
-
-  hideMessageArea();
-}
-
-function hideMessageArea(): void {
-  const area = document.getElementById("contact-message-area");
-  const noMethod = document.getElementById("contact-no-method");
-  const inputArea = document.getElementById("contact-message-input-area");
-  if (area) area.classList.add("hidden");
-  if (noMethod) noMethod.classList.add("hidden");
-  if (inputArea) inputArea.classList.add("hidden");
-}
-
-function onContactAction(): void {
-  const select = document.getElementById("contact-select") as HTMLSelectElement | null;
-  if (!select || !select.value) return;
-
-  const id = select.value;
-  selectedContactId = id;
-  const area = document.getElementById("contact-message-area");
-  const noMethod = document.getElementById("contact-no-method");
-  const inputArea = document.getElementById("contact-message-input-area");
-  if (!area || !noMethod || !inputArea) return;
-
-  area.classList.remove("hidden");
-
-  // Fetch contacts to check method availability
-  window.tabDashboard.getContacts().then(contacts => {
-    const c = contacts.find(ct => ct.id === id);
-    if (!c) return;
-    if (!c.email && !c.phone) {
-      noMethod.classList.remove("hidden");
-      inputArea.classList.add("hidden");
-    } else {
-      noMethod.classList.add("hidden");
-      inputArea.classList.remove("hidden");
-    }
-  });
-}
-
-function onContactSend(): void {
-  const select = document.getElementById("contact-select") as HTMLSelectElement | null;
-  const input = document.getElementById("contact-message-input") as HTMLTextAreaElement | null;
-  if (!select || !input || !select.value) return;
-  const message = input.value.trim();
-  if (!message) return;
-  window.tabDashboard.sendMessage(select.value, message);
-  input.value = "";
-  hideMessageArea();
-}
-
-async function refreshContacts(): Promise<void> {
-  const c = await window.tabDashboard.getContacts();
-  renderContactsDropdown(c);
-}
-
-function openContactConfig(): void {
-  const overlay = document.getElementById("contact-config-overlay");
-  if (overlay) overlay.classList.remove("hidden");
-}
-
-function closeContactConfig(): void {
-  const overlay = document.getElementById("contact-config-overlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-async function addContactSubmit(): Promise<void> {
-  const name = (document.getElementById("contact-name-input") as HTMLInputElement).value.trim();
-  const role = (document.getElementById("contact-role-input") as HTMLInputElement).value.trim();
-  const email = (document.getElementById("contact-email-input") as HTMLInputElement).value.trim();
-  const phone = (document.getElementById("contact-phone-input") as HTMLInputElement).value.trim();
-  if (!name) return;
-  await window.tabDashboard.addContact({ name, role, email, phone });
-  (document.getElementById("contact-name-input") as HTMLInputElement).value = "";
-  (document.getElementById("contact-role-input") as HTMLInputElement).value = "";
-  (document.getElementById("contact-email-input") as HTMLInputElement).value = "";
-  (document.getElementById("contact-phone-input") as HTMLInputElement).value = "";
-  closeContactConfig();
-  await refreshContacts();
-}
-
 async function init(): Promise<void> {
   const api = window.tabDashboard;
 
@@ -599,17 +400,15 @@ async function init(): Promise<void> {
   api.onPermissionStatus((ok: boolean) => setPermissionBanner(ok));
   api.onStressUpdate((data: StressPoint, history: StressPoint[]) => renderStress(data, history));
 
-  // Loneliness
   const lonelinessData = await api.getLoneliness();
   renderLoneliness(lonelinessData);
   api.onSocialUpdate((data: LonelinessData) => renderLoneliness(data));
 
-  // Fault codes (with cooldown)
   let lastFaultNotif = 0;
   api.onFaultTriggered((fault: FaultData) => {
     const faultEl = document.getElementById("active-fault");
     if (!faultEl) return;
-    faultEl.textContent = `\u26A0 ${fault.code}: ${fault.message}`;
+    faultEl.textContent = `⚠ ${fault.code}: ${fault.message}`;
     faultEl.classList.remove("hidden");
     const now = Date.now();
     if (now - lastFaultNotif > 120000) {
@@ -618,10 +417,8 @@ async function init(): Promise<void> {
     }
   });
 
-  // Auto-breath listener
   setupAutoBreath();
 
-  // Sleep slider
   const slider = document.getElementById("sleep-slider") as HTMLInputElement | null;
   const display = document.getElementById("sleep-display");
   if (slider && display) {
@@ -633,36 +430,11 @@ async function init(): Promise<void> {
     });
   }
 
-  // Alarm state
-  const alarmActive = await api.getAlarmState();
-  const body = document.getElementById("app-body");
-  if (alarmActive && body) body.classList.add("alarm");
-
   setupToggle();
 
-  document.getElementById("open-prefs-btn")?.addEventListener("click", () => {
-    api.openAccessibilityPrefs();
-  });
-
-  // Survey
-  document.getElementById("survey-btn")?.addEventListener("click", openSurvey);
-  document.getElementById("survey-submit")?.addEventListener("click", submitSurvey);
-  document.getElementById("survey-cancel")?.addEventListener("click", cancelSurvey);
-
-  // Rage Room
+  document.getElementById("open-prefs-btn")?.addEventListener("click", () => api.openAccessibilityPrefs());
   document.getElementById("rage-btn")?.addEventListener("click", () => api.openRageRoom());
-
-  // Open web dashboard
   document.getElementById("open-dashboard-btn")?.addEventListener("click", () => api.openWebDashboard());
-
-  // Trusted Contacts
-  void refreshContacts();
-  document.getElementById("contact-action-btn")?.addEventListener("click", onContactAction);
-  document.getElementById("contact-send-btn")?.addEventListener("click", onContactSend);
-  document.getElementById("contacts-configure-btn")?.addEventListener("click", openContactConfig);
-  document.getElementById("contact-config-cancel")?.addEventListener("click", closeContactConfig);
-  document.getElementById("contact-config-cancel2")?.addEventListener("click", closeContactConfig);
-  document.getElementById("contact-config-add")?.addEventListener("click", addContactSubmit);
 }
 
 init();
