@@ -1,7 +1,7 @@
-// Vercel Cron function — sends due scheduled check-in emails.
-// Scheduled hourly via vercel.json "crons".
+// Cron endpoint — sends due scheduled check-in emails.
+// Called hourly by cron-job.org (GET request with Authorization: Bearer <CRON_SECRET>).
 // Requires env: RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY,
-//   VITE_SUPABASE_URL (or SUPABASE_URL), optional CRON_SECRET, RESEND_FROM.
+//   VITE_SUPABASE_URL (or SUPABASE_URL), CRON_SECRET, optional RESEND_FROM.
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { checkinHtml } from '../send-checkin'
@@ -11,9 +11,13 @@ export const config = { runtime: 'nodejs' }
 type Frequency = 'off' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 export default async function handler(req: any, res: any) {
-  // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` when CRON_SECRET is set.
+  // Accept GET (cron-job.org) or POST
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+  // Require CRON_SECRET — set this in Vercel env vars and cron-job.org request header
   const secret = process.env.CRON_SECRET
-  if (secret && req.headers.authorization !== `Bearer ${secret}`) {
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
