@@ -393,6 +393,13 @@ function startBreathing(): void {
 
 function setupAutoBreath(): void {
   window.tabDashboard.onAutoBreath(() => startBreathing());
+  document.getElementById("alarm-dismiss")?.addEventListener("click", () => {
+    const overlay = document.getElementById("alarm-overlay");
+    if (breathInterval) { clearInterval(breathInterval); breathInterval = null; }
+    if (warningTimeout) { clearInterval(warningTimeout as unknown as number); warningTimeout = null; }
+    overlay?.classList.add("hidden");
+    window.tabDashboard.clearAlarm();
+  });
 }
 
 // ── Tabs ──
@@ -654,6 +661,7 @@ async function init(): Promise<void> {
   document.getElementById("contact-send-btn")?.addEventListener("click", onContactSend);
   document.getElementById("contacts-configure-btn")?.addEventListener("click", openContactConfig);
   document.getElementById("contact-config-cancel")?.addEventListener("click", closeContactConfig);
+  document.getElementById("contact-config-cancel2")?.addEventListener("click", closeContactConfig);
   document.getElementById("contact-config-add")?.addEventListener("click", addContactSubmit);
 }
 

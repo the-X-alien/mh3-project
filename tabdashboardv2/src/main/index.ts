@@ -1,8 +1,6 @@
 import { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, NativeImage, shell, screen } from "electron";
 import { execFile } from "child_process";
 import path from "path";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { createCanvas } = require("canvas");
 import { TabReader, TabSnapshot } from "./tabReader";
 
 let tray: Tray | null = null;
@@ -49,33 +47,55 @@ interface StressPoint {
 const stressHistory: StressPoint[] = [];
 
 function createTrayIcon(score?: number): NativeImage {
-  const size = 32;
-  const canvas = createCanvas(size, size);
-  const ctx = canvas.getContext("2d");
+  // 16x16 RGBA pixel buffer — praying hands shape + stress-color underline
+  // No native deps required.
+  const S = 16;
+  const buf = Buffer.alloc(S * S * 4);
 
-  // Draw 🙏 emoji then recolor to white
-  ctx.clearRect(0, 0, size, size);
-  ctx.font = "22px 'Apple Color Emoji', serif";
-  ctx.textBaseline = "top";
-  ctx.fillText("🙏", 2, 1);
-  // Recolor emoji to white while preserving shape
-  ctx.globalCompositeOperation = "source-atop";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, size, size);
-  ctx.globalCompositeOperation = "source-over";
-
-  // Draw stress-color underline bar at bottom
-  let color = "#888888";
+  // Stress color for underline bar (bottom 2 rows)
+  let ur = 136, ug = 136, ub = 136; // grey = unknown
   if (score !== undefined) {
-    if (score < 35)      color = "#69F0AE"; // green = calm
-    else if (score < 65) color = "#FFD54F"; // yellow = tense
-    else                 color = "#FF5252"; // red = stressed
+    if (score < 35)      { ur = 46;  ug = 204; ub = 113; } // green  = calm
+    else if (score < 65) { ur = 230; ug = 168; ub = 23;  } // amber  = tense
+    else                 { ur = 230; ug = 80;  ub = 50;  } // red    = stressed
   }
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 28, size, 4);
 
-  const buf: Buffer = canvas.toBuffer("image/png");
-  return nativeImage.createFromBuffer(buf).resize({ width: 16, height: 16 });
+  // Hand silhouette — 1 = white pixel, 0 = transparent
+  // Hand shape: two mirrored arcs meeting at center bottom
+  const hand = [
+    "0000011110000000",
+    "0000111111000000",
+    "0001111111100000",
+    "0011111111110000",
+    "0011111111110000",
+    "0111111111111000",
+    "0111111111111000",
+    "0111111111111000",
+    "0011111111110000",
+    "0011111111110000",
+    "0001111111100000",
+    "0001111111100000",
+    "0000111111100000",
+    "0000000000000000",
+    "1111111111111111", // underline row 1
+    "1111111111111111", // underline row 2
+  ];
+
+  for (let y = 0; y < S; y++) {
+    for (let x = 0; x < S; x++) {
+      const i = (y * S + x) * 4;
+      const isUnderline = y >= S - 2;
+      if (isUnderline) {
+        buf[i] = ur; buf[i+1] = ug; buf[i+2] = ub; buf[i+3] = 220;
+      } else if (hand[y]?.[x] === "1") {
+        buf[i] = 255; buf[i+1] = 255; buf[i+2] = 255; buf[i+3] = 220;
+      } else {
+        buf[i+3] = 0;
+      }
+    }
+  }
+
+  return nativeImage.createFromBuffer(buf, { width: S, height: S });
 }
 
 function showNotification(title: string, body: string): void {

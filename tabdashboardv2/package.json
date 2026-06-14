@@ -27,8 +27,5 @@
     "electron": "^42.4.0",
     "electron-builder": "^24.0.0",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "canvas": "^3.2.3"
   }
 }

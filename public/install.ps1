@@ -1,91 +1,89 @@
 # Shanti — Tab Viewer installer (Windows)
-# Clones the repo, installs dependencies, builds the desktop app, launches it,
-# and adds a Start Menu shortcut.
+# Clones the repo, builds tabdashboardv2, launches it as a system tray app.
 # Usage:  powershell -c "irm https://mh3-project.vercel.app/install.ps1 | iex"
 
 $ErrorActionPreference = "Stop"
 
-$repo   = "https://github.com/the-X-alien/mh3-project.git"
-$appDir = Join-Path $env:LOCALAPPDATA "Shanti"
+$repo    = "https://github.com/the-X-alien/mh3-project.git"
+$appBase = Join-Path $env:LOCALAPPDATA "Shanti"
+$appDir  = Join-Path $appBase "tabdashboardv2"
 
 function Say  ($m) { Write-Host "  $m" -ForegroundColor Cyan }
-function Ok   ($m) { Write-Host "  $m" -ForegroundColor Green }
-function Warn ($m) { Write-Host "  $m" -ForegroundColor Yellow }
-function Fail ($m) { Write-Host "  $m" -ForegroundColor Red; exit 1 }
+function Ok   ($m) { Write-Host "  ✓ $m" -ForegroundColor Green }
+function Fail ($m) { Write-Host "  ✗ $m" -ForegroundColor Red; exit 1 }
 
 Write-Host ""
-Write-Host "  Shanti - Tab Viewer" -ForegroundColor White
+Write-Host "  🙏 Shanti — Tab Viewer" -ForegroundColor White
 Write-Host ""
 
 # ── Prerequisites ──────────────────────────────────────────────
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-  Warn "Git not found - attempting to install via winget..."
+  Say "Git not found — attempting install via winget..."
   if (Get-Command winget -ErrorAction SilentlyContinue) {
     winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
   } else {
-    Fail "Git is required. Install it from https://git-scm.com and re-run."
+    Fail "Git is required. Install from https://git-scm.com and re-run."
   }
 }
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Warn "Node.js not found - attempting to install via winget..."
+  Say "Node.js not found — attempting install via winget..."
   if (Get-Command winget -ErrorAction SilentlyContinue) {
     winget install --id OpenJS.NodeJS.LTS -e --source winget --accept-package-agreements --accept-source-agreements
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
   } else {
-    Fail "Node.js 18+ is required. Install it from https://nodejs.org and re-run."
+    Fail "Node.js 18+ is required. Install from https://nodejs.org and re-run."
   }
 }
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Fail "Node.js still not on PATH. Open a new terminal and re-run this command."
+  Fail "Node.js still not on PATH. Open a new terminal and re-run."
 }
 
-$nodeMajor = (node -p "process.versions.node.split('.')[0]")
-if ([int]$nodeMajor -lt 18) {
-  Fail "Node.js 18 or newer is required (found $(node -v)). Please upgrade and re-run."
-}
+$nodeMajor = [int](node -p "process.versions.node.split('.')[0]")
+if ($nodeMajor -lt 18) { Fail "Node.js 18+ required (found $(node -v)). Please upgrade." }
 
 # ── Fetch source ───────────────────────────────────────────────
-if (Test-Path (Join-Path $appDir ".git")) {
-  Say "Updating existing install in $appDir ..."
-  git -C $appDir fetch --depth 1 origin main
-  git -C $appDir reset --hard origin/main
+if (Test-Path (Join-Path $appBase ".git")) {
+  Say "Updating existing install..."
+  git -C $appBase fetch --depth 1 origin main
+  git -C $appBase reset --hard origin/main
 } else {
-  Say "Cloning Shanti into $appDir ..."
-  if (Test-Path $appDir) { Remove-Item -Recurse -Force $appDir }
-  git clone --depth 1 $repo $appDir
+  Say "Cloning Shanti..."
+  if (Test-Path $appBase) { Remove-Item -Recurse -Force $appBase }
+  git clone --depth 1 $repo $appBase
 }
 
+# ── Build tabdashboardv2 ───────────────────────────────────────
+Say "Installing dependencies (this may take a minute)..."
 Set-Location $appDir
-
-# ── Build ──────────────────────────────────────────────────────
-Say "Installing dependencies (this may take a minute) ..."
 npm install --no-audit --no-fund
 
-Say "Building the desktop app ..."
-npm run build:electron
+Say "Building..."
+npm run build
 
-# ── Launcher + Start Menu shortcut ─────────────────────────────
-$launcher = Join-Path $appDir "Shanti.cmd"
-"@echo off`r`ncd /d `"$appDir`"`r`nnpx electron ." | Out-File -FilePath $launcher -Encoding ascii -Force
+# ── Launcher script ────────────────────────────────────────────
+$launcher = Join-Path $appBase "Shanti.cmd"
+"@echo off`r`ncd /d `"$appDir`"`r`nnpx electron . %*" | Out-File -FilePath $launcher -Encoding ascii -Force
 
-$programs = Join-Path ([Environment]::GetFolderPath("StartMenu")) "Programs"
-$shortcut = Join-Path $programs "Shanti.lnk"
-$wscript  = New-Object -ComObject WScript.Shell
+# Start Menu shortcut
+$programs  = Join-Path ([Environment]::GetFolderPath("StartMenu")) "Programs"
+$shortcut  = Join-Path $programs "Shanti.lnk"
+$wscript   = New-Object -ComObject WScript.Shell
 $sc = $wscript.CreateShortcut($shortcut)
 $sc.TargetPath       = "cmd.exe"
 $sc.Arguments        = "/c `"$launcher`""
 $sc.WorkingDirectory = $appDir
-$sc.WindowStyle      = 7  # minimized
+$sc.WindowStyle      = 7
 $sc.Save()
 
-Ok "Shanti installed."
-Say "Launching now - look for the praying-hands icon in your system tray."
-Write-Host ""
-Say "To launch again later: Start Menu -> Shanti  (or run $launcher)"
-Write-Host ""
-
 # ── Launch ─────────────────────────────────────────────────────
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npx electron ." -WorkingDirectory $appDir -WindowStyle Hidden
+Say "Launching Shanti..."
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "`"$launcher`"" -WindowStyle Hidden
+
+Write-Host ""
+Ok "Shanti installed and running!"
+Say "Look for 🙏 in your system tray."
+Say "To relaunch: Start Menu → Shanti"
+Write-Host ""
