@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com" />
   <title>Shanti</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body id="app-body">
@@ -42,13 +45,22 @@
     </div>
 
     <header class="header">
-      <h1 class="title">Shanti</h1>
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.8 19.6A2 2 0 1 0 14 16H2" />
+            <path d="M17.5 8a2.5 2.5 0 1 1 2 4H2" />
+            <path d="M9.8 4.4A2 2 0 1 1 11 8H2" />
+          </svg>
+        </div>
+        <h1 class="title">Shanti</h1>
+      </div>
       <div class="header-btns">
         <button id="survey-btn" class="survey-btn">Survey</button>
         <button id="rage-btn" class="rage-btn">Rage Room</button>
       </div>
     </header>
-    <p class="subtitle">Tracks browser tabs to help you stay focused</p>
+    <p class="subtitle">Take a moment to check in with yourself</p>
 
     <!-- Stress Score -->
     <div id="stress-section" class="stress-section">
