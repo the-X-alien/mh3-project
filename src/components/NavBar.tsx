@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, LineChart, Wind, Settings, LogOut, Sun, Moon, Loader2 } from 'lucide-react'
+import { LayoutDashboard, LineChart, Wind, Settings, LogOut, Sun, Moon, Loader2, Heart, MessageCircle, BookOpen } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 
 const links = [
@@ -9,6 +9,9 @@ const links = [
   { to: '/history', label: 'History', icon: LineChart },
   { to: '/breathe', label: 'Breathe', icon: Wind },
   { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/contacts', label: 'Contacts', icon: Heart },
+  { to: '/qa', label: 'Q&A', icon: MessageCircle },
+  { to: '/how-it-works', label: 'How It Works', icon: BookOpen },
 ]
 
 export default function NavBar() {
