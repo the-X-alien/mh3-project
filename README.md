@@ -4,7 +4,7 @@ A cross-platform desktop wellness app that monitors computer activity via AI to 
 
 ## Features
 
-- **Stress Detection** — background monitor tracks window switches, idle time, typing patterns — analyzed by AI (Hack Club AI + OpenRouter free) every 30 seconds
+- **Stress Detection** — background monitor tracks window switches, idle time, typing patterns — analyzed by our algorithim every 30 seconds
 - **Guided Breathing** — full-screen breathing exercise (4s inhale / 2s hold / 6s exhale, 4 cycles) triggered by stress or manually (resend api)
 - **Scheduled Check-ins** — set email frequency (hourly / daily / weekly / monthly / yearly) — Resend sends wellness reminders automatically
 - **Desktop App** — runs in system tray, launches at startup, live tray icon changes color with stress level
