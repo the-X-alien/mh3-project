@@ -52,6 +52,7 @@ interface TabDashboardAPI {
   removeContact: (id: string) => Promise<void>;
   contactPerson: (id: string, method: "email" | "sms") => void;
   sendMessage: (id: string, message: string) => void;
+  openWebDashboard: () => void;
 }
 
 declare global {
@@ -643,6 +644,9 @@ async function init(): Promise<void> {
 
   // Rage Room
   document.getElementById("rage-btn")?.addEventListener("click", () => api.openRageRoom());
+
+  // Open web dashboard
+  document.getElementById("open-dashboard-btn")?.addEventListener("click", () => api.openWebDashboard());
 
   // Trusted Contacts
   void refreshContacts();

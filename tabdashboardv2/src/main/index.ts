@@ -318,6 +318,10 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.on("open-web-dashboard", () => {
+    void shell.openExternal("https://mh3-project.vercel.app/dashboard");
+  });
+
   ipcMain.on("open-accessibility-prefs", () => {
     void shell.openExternal(
       "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"

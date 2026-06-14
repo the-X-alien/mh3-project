@@ -85,4 +85,7 @@ contextBridge.exposeInMainWorld("tabDashboard", {
   removeContact: (id: string): Promise<void> => ipcRenderer.invoke("remove-contact", id),
   contactPerson: (id: string, method: "email" | "sms"): void => { ipcRenderer.send("contact-person", id, method); },
   sendMessage: (id: string, message: string): void => { ipcRenderer.send("send-message", id, message); },
+
+  // Open web dashboard
+  openWebDashboard: (): void => { ipcRenderer.send("open-web-dashboard"); },
 });
