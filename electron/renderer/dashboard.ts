@@ -157,12 +157,19 @@ function renderStressGraph(history: StressPoint[]): void {
   svg.innerHTML = `<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${pts.join(" ")}"/>
     <polygon fill="var(--accent)" fill-opacity="0.12" points="${pts.join(" ")} ${w},${h} 0,${h}"/>`;
 }
+function emotionColor(score: number): string {
+  return score < 35 ? "#69F0AE" : score < 65 ? "#FFD54F" : "#FF5252";
+}
+
 function renderStress(data: StressPoint, history: StressPoint[]): void {
   const valEl = document.getElementById("stress-value");
   const hrsEl = document.getElementById("factor-hours");
   const swEl  = document.getElementById("factor-switches");
   const sitEl = document.getElementById("factor-sites");
-  if (valEl) { valEl.textContent = String(data.score); valEl.style.color = data.score<35?"#69F0AE":data.score<65?"#FFD54F":"#FF5252"; }
+  const underline = document.getElementById("logo-underline");
+  const color = emotionColor(data.score);
+  if (valEl) { valEl.textContent = String(data.score); valEl.style.color = color; }
+  if (underline) underline.style.background = color;
   if (hrsEl) hrsEl.textContent = `${data.factors.hoursWorked.toFixed(1)}h`;
   if (swEl)  swEl.textContent  = `${data.factors.switchRate.toFixed(1)}/min`;
   if (sitEl) sitEl.textContent = String(data.factors.uniqueSites);
