@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Phone, Shield, AlertTriangle, Heart } from 'lucide-react'
+import Seo from './Seo'
 
 const RESOURCES = [
   {
@@ -55,6 +56,7 @@ const RESOURCES = [
 export default function Contacts() {
   return (
     <div className="max-w-2xl mx-auto pt-8 pb-24 space-y-8">
+      <Seo title="Crisis Resources & Trusted Contacts" description="Free, confidential crisis support lines including 988 Suicide & Crisis Lifeline, NAMI Helpline, Crisis Text Line, and more. You are not alone." path="/contacts" />
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="flex items-center gap-3 mb-1">
           <Heart size={20} className="text-amber" />

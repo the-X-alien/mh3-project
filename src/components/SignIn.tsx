@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import Seo from './Seo'
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -72,6 +73,7 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
+      <Seo title="Sign In — Wellness Dashboard" description="Sign in or create your Shanti account to track your wellness history, configure email check-ins, and manage your settings." path="/sign-in" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

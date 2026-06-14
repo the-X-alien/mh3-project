@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Line } from 'react-chartjs-2'
+import Seo from './Seo'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -92,6 +93,7 @@ export default function History() {
 
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto pt-8">
+      <Seo title="Wellness History & Stress Trends" description="View your historical stress scores, breathing session logs, and wellness check-in trends over time." path="/history" />
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}

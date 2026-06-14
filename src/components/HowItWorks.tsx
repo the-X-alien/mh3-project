@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Database, Code2, Eye, Mail, Cpu, Globe, Lock, GitBranch } from 'lucide-react'
+import Seo from './Seo'
 
 const SECTIONS = [
   {
@@ -109,6 +110,7 @@ For the website: npm install && npm run dev from the root.`,
 export default function HowItWorks() {
   return (
     <div className="max-w-2xl mx-auto pt-8 pb-24 space-y-8">
+      <Seo title="How It Works — Architecture & Technology" description="Learn how Shanti works under the hood: Cognitive Load Index algorithm, tab tracking on macOS/Windows, Supabase database, email check-ins, and privacy architecture." path="/how-it-works" />
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <h1 className="font-cursive text-3xl text-pure mb-1">How It All Works</h1>
         <p className="font-body text-sm text-fog/60">

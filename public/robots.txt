@@ -1,0 +1,15 @@
+# Shanti — wellness companion
+# https://mh3-project.vercel.app
+
+User-agent: *
+Allow: /
+Allow: /dashboard
+Allow: /breathe
+Allow: /history
+Allow: /how-it-works
+Allow: /qa
+Allow: /contacts
+Disallow: /sign-in
+Disallow: /settings
+
+Sitemap: https://mh3-project.vercel.app/sitemap.xml

@@ -1,0 +1,21 @@
+{
+  "name": "Shanti",
+  "short_name": "Shanti",
+  "description": "AI-powered desktop wellness companion — stress detection, breathing exercises, and email check-ins. Privacy-first mental health tool.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#e6a817",
+  "icons": [
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { Wind, Play } from 'lucide-react'
 import { useWellness } from '@/context/WellnessContext'
 import { useAuth } from './AuthProvider'
 import { logWellnessEvent } from '@/lib/wellness'
+import Seo from './Seo'
 
 const STEPS = [
   { phase: 'Breathe In', secs: 4, desc: 'Slowly fill your lungs through your nose.' },
@@ -22,6 +23,7 @@ export default function Breathe() {
 
   return (
     <div className="flex flex-col gap-8 max-w-lg mx-auto pt-10">
+      <Seo title="Guided Breathing Exercise — 4-2-6 Box Breathing" description="Follow Shanti's guided breathing exercise — a 4-second inhale, 2-second hold, 6-second exhale cycle repeated four times to reduce stress and anxiety." path="/breathe" />
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}

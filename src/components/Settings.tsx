@@ -4,6 +4,7 @@ import { User, Mail, LogOut, Loader2, Calendar } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 import ScheduleSettings from './ScheduleSettings'
+import Seo from './Seo'
 
 export default function Settings() {
   const { user, signOut } = useAuth()
@@ -22,6 +23,7 @@ export default function Settings() {
 
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto pt-8">
+      <Seo title="Settings — Account & Email Check-in Schedule" description="Manage your Shanti account settings, email check-in schedule frequency, and notification preferences." path="/settings" />
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}

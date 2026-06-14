@@ -7,6 +7,7 @@ import { logWellnessEvent } from '@/lib/wellness'
 import AiInsights from './AiInsights'
 import TabViewer from './TabViewer'
 import { useState, useEffect } from 'react'
+import Seo from './Seo'
 
 function UpdateManager() {
   const [updateStatus, setUpdateStatus] = useState<{ status: string; data?: any } | null>(null)
@@ -94,6 +95,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-8 max-w-lg mx-auto pt-8">
+      <Seo title="Dashboard — Stress & Wellness Tracking" description="View your real-time stress score, track tab activity, and access breathing exercises on your Shanti wellness dashboard." path="/dashboard" />
       <header className="text-center space-y-2">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}

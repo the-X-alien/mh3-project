@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { Wind, Brain, Activity, Download, ArrowRight } from 'lucide-react'
+import { Wind, Brain, Activity, Download, ArrowRight, Github } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import Seo from './Seo'
 
 function InstallCommand() {
   const [os, setOs] = useState<'windows' | 'mac' | 'linux'>('mac')
@@ -55,6 +56,12 @@ function InstallCommand() {
 
 export default function Landing() {
   return (
+    <>
+    <Seo
+      title="AI-Powered Desktop Wellness & Stress Detection"
+      description="Shanti is a privacy-first desktop wellness companion that detects stress from your computer activity, guides breathing exercises, and sends scheduled check-ins. Free, open source, AI-powered mental health tool for Windows and macOS."
+      path="/"
+    />
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2">
@@ -92,11 +99,13 @@ export default function Landing() {
           <h1 className="font-cursive text-5xl sm:text-6xl text-pure leading-tight mb-5">
             Your mindful
             <br />
-            <span className="text-gradient-amber">companion</span>
+            <span className="text-gradient-amber">stress detection</span>
           </h1>
           <p className="font-body text-base text-fog/80 leading-relaxed max-w-lg mx-auto mb-10">
-            Shanti monitors your desktop activity, detects stress patterns, and guides you
-            through breathing exercises — all powered by AI and beautifully private.
+            Shanti is a free, open source wellness app that detects stress from your desktop
+            activity, guides breathing exercises, and sends email check-ins. Track your
+            cognitive load, reduce screen time anxiety, and build healthier digital habits
+            — all without sending your browsing data anywhere.
           </p>
 
           <div className="flex items-center justify-center gap-4">
@@ -167,7 +176,18 @@ export default function Landing() {
 
       <footer className="text-center pb-8">
         <p className="font-body text-[11px] text-fog/40">Shanti &mdash; open source and privacy-first.</p>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <a href="https://github.com/the-X-alien/mh3-project" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 font-body text-[11px] text-fog/40 hover:text-amber transition-colors">
+            <Github size={12} />
+            GitHub
+          </a>
+          <span className="text-fog/20">&middot;</span>
+          <a href="https://devpost.com/software/shanti-uqrlty" target="_blank" rel="noopener noreferrer" className="font-body text-[11px] text-fog/40 hover:text-amber transition-colors">
+            Devpost
+          </a>
+        </div>
       </footer>
     </div>
+    </>
   )
 }

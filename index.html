@@ -2,13 +2,169 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://mh3-project.vercel.app/" />
+
+    <!-- Primary Meta Tags -->
+    <title>Shanti — AI-Powered Desktop Wellness & Stress Detection App</title>
+    <meta name="title" content="Shanti — AI-Powered Desktop Wellness & Stress Detection App" />
+    <meta name="description" content="Shanti is a privacy-first desktop wellness companion that detects stress from your computer activity, guides breathing exercises, and sends scheduled check-ins. Free, open source, AI-powered mental health tool for Windows and macOS." />
+    <meta name="keywords" content="mental health app, stress detection, wellness companion, desktop wellness, stress monitoring, breathing exercises, cognitive load, screen time tracker, digital wellness, mental health tool, open source mental health, privacy first wellness, AI stress detection, computer wellness app, break reminder, tab tracker, productivity wellness" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mh3-project.vercel.app/" />
+    <meta property="og:title" content="Shanti — AI-Powered Desktop Wellness & Stress Detection App" />
+    <meta property="og:description" content="Shanti monitors your desktop activity, detects stress patterns, and guides you through breathing exercises — all powered by AI and beautifully private." />
+    <meta property="og:image" content="https://mh3-project.vercel.app/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://mh3-project.vercel.app/" />
+    <meta property="twitter:title" content="Shanti — AI-Powered Desktop Wellness & Stress Detection App" />
+    <meta property="twitter:description" content="Shanti monitors your desktop activity, detects stress patterns, and guides you through breathing exercises — all powered by AI and beautifully private." />
+    <meta property="twitter:image" content="https://mh3-project.vercel.app/og-image.png" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Space+Mono:wght@400;700&family=Dancing+Script:wght@400;500;700&family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
+
+    <!-- Google site verification -->
     <meta name="google-site-verification" content="hsRnhoOKdNQHQH2m68LC6Ir2riitCE_2UJDfKqM3e6U" />
-    <title>Shanti</title>
+
+    <!-- Bing / Yandex verification (placeholder — add your codes) -->
+    <meta name="msvalidate.01" content="" />
+    <meta name="yandex-verification" content="" />
+
+    <!-- Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Shanti",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Windows, macOS",
+      "description": "Privacy-first desktop wellness companion that detects stress from computer activity, guides breathing exercises, and sends scheduled check-ins.",
+      "url": "https://mh3-project.vercel.app",
+      "author": {
+        "@type": "Organization",
+        "name": "Shanti"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <!-- Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Shanti",
+      "url": "https://mh3-project.vercel.app",
+      "description": "Open source mental health and digital wellness tools.",
+      "sameAs": [
+        "https://github.com/the-X-alien/mh3-project"
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Shanti",
+      "url": "https://mh3-project.vercel.app",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://mh3-project.vercel.app/qa?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Structured Data: FAQ (curated subset) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the Cognitive Load Index (CLI)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The CLI is Shanti's stress score from 0–100. It is computed locally on your device using four signals: hours of screen time today, how fast you switch between tabs, the number of unique websites visited, and last night's sleep hours. No AI or server is involved — the formula runs entirely on your machine."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Shanti free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Shanti is completely free and open source. The source code is available on GitHub."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Shanti work without the desktop app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, the website dashboard shows your historical stress trends, wellness log, and settings. However, real-time tab tracking and the breathing alarm require the desktop app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does Shanti detect stress?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Shanti monitors your tab switching frequency, unique websites visited, total screen time, and self-reported sleep hours. These four signals are combined into a Cognitive Load Index score from 0 to 100, updated every 30 seconds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data private?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your tab titles and browsing data never leave your device. Only your stress score and self-reported data are stored in your account. Shanti has no analytics, no third-party trackers, and no ad networks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I install the Shanti desktop app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "On macOS, run: curl -fsSL https://mh3-project.vercel.app/install.sh | sh. On Windows, run: powershell -c \"irm https://mh3-project.vercel.app/install.ps1 | iex\". This clones the repo, builds the app from source, and launches it in your system tray."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What operating systems does Shanti support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Shanti supports Windows (x64) and macOS (Intel and Apple Silicon). Linux support is coming soon."
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body class="bg-void text-pure font-body antialiased">
     <div id="root"></div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, MessageCircle } from 'lucide-react'
+import Seo from './Seo'
 
 const QA_ITEMS = [
   {
@@ -84,6 +85,7 @@ function Item({ q, a, i }: { q: string; a: string; i: number }) {
 export default function QA() {
   return (
     <div className="max-w-2xl mx-auto pt-8 pb-24 space-y-8">
+      <Seo title="FAQ — Questions About Stress Detection & Wellness" description="Answers to common questions about Shanti: how stress detection works, privacy, installation, breathing exercises, and more." path="/qa" />
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="flex items-center gap-2 mb-1">
           <MessageCircle size={18} className="text-amber" />
