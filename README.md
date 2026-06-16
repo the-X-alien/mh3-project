@@ -16,7 +16,7 @@ Run the command for windows or mac on the website (linux support comming soon)
 
 ## Web Dashboard
 
-The web version is live at **https://mh3-project.vercel.app** — log in to view your stress history, manage email schedule, and track wellness trends.
+The web version is live at **https://shanti-help.vercel.app** — log in to view your stress history, manage email schedule, and track wellness trends.
 
 Devpost at **https://devpost.com/software/shanti-uqrlty**
 
